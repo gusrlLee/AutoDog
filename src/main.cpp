@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
     std::cout << "=======================================================================" << std::endl;
 
     MainSystem main_system = new MainSystem(false);
-    main_system.display(file_path);
+    main_system.startProgram(file_path);
 
     return 0;
 }
