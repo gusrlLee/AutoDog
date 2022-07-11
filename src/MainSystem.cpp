@@ -1,12 +1,28 @@
 #include "MainSystem.h"
 
-MainSystem::MainSystem() {}
+MainSystem::MainSystem(bool mode) {
+    this->system_mode = mode;
+}
 
-int MainSystem::startCameraMode(const char* video_path) {
-    cv::VideoCapture cap(video_path);
+void MainSystem::display(const char* file_path) {
+    cv::Mat frame;  
+    cv::VideoCapture cap(file_path);
+
     if (!cap.isOpened()) {
-        std::cout << "[ERROR]::Faild to open Video! Check your Video path" << std::endl;
-    } 
+        std::cout << "[ERROR]::Cannot to load frame or camera!, Check camera or Video" << std::endl;
+        return;
+    }
 
-    return 0;
+    while (1) {
+        cap >> frame;
+        if (frame.empty()) {
+            break;
+        }
+
+        cv::imshow("Monitor", frame);
+        int key = cv::waitKey(25);
+        if (key == 27) {
+            break;
+        }
+    }
 }

@@ -26,6 +26,7 @@ int main(int argc, char* argv[]) {
     bool camera_mode = parser.get<bool>("c");
     const char* calibration_data_file = nullptr;
     const char* camera_path = nullptr;
+    const char* file_path = "../data/highway.mp4";
     
     std::cout << "==========================System Information===========================" << std::endl;
     std::cout << "Simulation Mode = " << simulation_mode << std::endl;
@@ -35,9 +36,8 @@ int main(int argc, char* argv[]) {
     std::cout << "Auto System Start..." << std::endl;
     std::cout << "=======================================================================" << std::endl;
 
-
-    MainSystem* main_system = new MainSystem();
-    main_system->startCameraMode("../Data/highway.mp4");
+    MainSystem main_system = new MainSystem(false);
+    main_system.display(file_path);
 
     return 0;
 }

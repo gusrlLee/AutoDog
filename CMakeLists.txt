@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
+set(CMAKE_CXX_STANDARD 11)
 project(Auto)
 
 find_package(OpenCV REQUIRED)
@@ -13,6 +14,6 @@ add_executable(${PROJECT_NAME}
     src/MainSystem.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} -lpthread)
 
 

@@ -1,4 +1,4 @@
-#ifdef __BUNDLE_ADJUSTMENT__
+#ifndef __BUNDLE_ADJUSTMENT__
 #define __BUNDLE_ADJUSTMENT__
 
 #include<iostream>
