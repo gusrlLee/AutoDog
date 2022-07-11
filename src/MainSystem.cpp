@@ -18,12 +18,7 @@ void MainSystem::startProgram(const char* file_path) {
     int a;
     cv::VideoCapture cap(file_path);
 
-    std::thread hello_thread(&MainSystem::hello, NULL, 1);
-
-    if (a < 0) {
-        std::cout << "ERROR not create thread" << std::endl;
-        return;
-    }
+    std::thread hello_thread(&MainSystem::hello, this);
 
     if (!cap.isOpened()) {
         std::cout << "[ERROR]::Cannot to load frame or camera!, Check camera or Video" << std::endl;
@@ -42,4 +37,6 @@ void MainSystem::startProgram(const char* file_path) {
             break;
         }
     }
+
+    hello_thread.join();
 }

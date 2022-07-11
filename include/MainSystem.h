@@ -9,17 +9,13 @@
 #include <thread>
 
 class MainSystem {
-        
-    public:
-        void hello();
-
     private:
         // false -> simulation mode 
         // true -> camera mode 
         bool system_mode = false;
         int stat;
+        void hello();
         
-
     public:
         MainSystem(bool mode);
         void startProgram(const char* file_path);
