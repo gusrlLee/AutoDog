@@ -8,6 +8,8 @@
 #include <string>
 #include <thread>
 
+#include "DogStatus.h"
+
 class MainSystem {
     private:
         // false -> simulation mode 
@@ -15,6 +17,7 @@ class MainSystem {
         bool system_mode = false;
         int stat;
         void hello();
+        DogStatus *dog_status;
         
     public:
         MainSystem(bool mode);

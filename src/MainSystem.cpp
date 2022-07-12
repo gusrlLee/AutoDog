@@ -2,6 +2,7 @@
 
 MainSystem::MainSystem(bool mode) {
     this->system_mode = mode;
+    this->dog_status = new DogStatus(); 
 }
 
 
@@ -18,7 +19,7 @@ void MainSystem::startProgram(const char* file_path) {
     int a;
     cv::VideoCapture cap(file_path);
 
-    std::thread hello_thread(&MainSystem::hello, this);
+    // std::thread hello_thread(&MainSystem::hello, this);
 
     if (!cap.isOpened()) {
         std::cout << "[ERROR]::Cannot to load frame or camera!, Check camera or Video" << std::endl;
@@ -30,13 +31,14 @@ void MainSystem::startProgram(const char* file_path) {
         if (frame.empty()) {
             break;
         }
+        dog_status->setCurrentFrame(frame);
 
-        cv::imshow("Monitor", frame);
+        cv::imshow("Monitor", dog_status->getCurrentFrame());
         int key = cv::waitKey(25);
         if (key == 27) {
             break;
         }
     }
 
-    hello_thread.join();
+    // hello_thread.join();
 }
