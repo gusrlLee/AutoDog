@@ -14,6 +14,7 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     src/MainSystem.cpp
     src/DogStatus.cpp
+    src/VisualOdometry.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} -lpthread)

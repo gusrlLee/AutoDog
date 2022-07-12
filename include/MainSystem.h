@@ -9,6 +9,7 @@
 #include <thread>
 
 #include "DogStatus.h"
+#include "VisualOdometry.h"
 
 class MainSystem {
     private:
@@ -18,6 +19,7 @@ class MainSystem {
         int stat;
         void hello();
         DogStatus *dog_status;
+        VisualOdometry *visual_odometry;
         
     public:
         MainSystem(bool mode);
