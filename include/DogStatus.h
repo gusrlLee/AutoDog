@@ -11,11 +11,21 @@ class DogStatus {
     private:
         cv::Mat curr_frame;
         cv::Mat prev_frame;
+        std::mutex current_frame_mutex;
+        
+        bool is_working;
+        std::mutex is_working_mutex;
+
+
         
     public:
         DogStatus();
+
         cv::Mat getCurrentFrame();
         void setCurrentFrame(cv::Mat current_frame);
+
+        bool getSystemStatus();
+        void setSystemStatus(bool flag);
 
 };
 

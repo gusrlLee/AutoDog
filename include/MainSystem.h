@@ -17,9 +17,13 @@ class MainSystem {
         // true -> camera mode 
         bool system_mode = false;
         int stat;
-        void hello();
+        
+        // threads  
+        static void cameraCaptureThread(DogStatus* dog_status, const char* file_path);
+        static void trajectoryComputeThread(VisualOdometry* vo, DogStatus* dog_status);
+
         DogStatus *dog_status;
-        VisualOdometry *visual_odometry;
+        VisualOdometry *vo;
         
     public:
         MainSystem(bool mode);
