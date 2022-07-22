@@ -1,5 +1,5 @@
-#ifndef __MAIN_SYSTEM__
-#define __MAIN_SYSTEM__
+#ifndef MAIN_SYSTEM_H
+#define MAIN_SYSTEM_H
 
 #include <opencv2/opencv.hpp>
 #include <iostream>
@@ -11,24 +11,24 @@
 #include "DogStatus.h"
 #include "VisualOdometry.h"
 
-class MainSystem {
+class MainSystem 
+{
     private:
-        // false -> simulation mode 
         // true -> camera mode 
+        // false -> simulation mode 
         bool system_mode = false;
         int stat;
+
+        DogStatus *dog_status; // status save space 
+        VisualOdometry *vo; // visual odometry 
         
         // threads  
-        static void cameraCaptureThread(DogStatus* dog_status, const char* file_path);
         static void trajectoryComputeThread(VisualOdometry* vo, DogStatus* dog_status);
-
-        DogStatus *dog_status;
-        VisualOdometry *vo;
         
     public:
         MainSystem(bool mode);
-        void startProgram(const char* file_path);
+        void startProgram();
 };
 
-#endif // __MAIN_SYSTEM__
+#endif // MAIN_SYSTEM_H
 

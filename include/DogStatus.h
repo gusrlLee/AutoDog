@@ -1,5 +1,5 @@
-#ifndef __DOG_STATUS__
-#define __DOG_STATUS__
+#ifndef DOG_STATUS_H
+#define DOG_STATUS_H
 
 #include <opencv2/opencv.hpp>
 #include <iostream>
@@ -10,7 +10,7 @@
 
 class DogStatus {
     private:
-        std::queue<cv::Mat> curr_frame_buffer;
+        cv::Mat curr_frame;
         cv::Mat prev_frame;
         std::mutex current_frame_mutex;
         
@@ -31,4 +31,4 @@ class DogStatus {
 
 };
 
-#endif // __DOG_STATUS__
+#endif // DOG_STATUS_H

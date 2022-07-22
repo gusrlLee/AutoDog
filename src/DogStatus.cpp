@@ -8,18 +8,13 @@ DogStatus::DogStatus() {
 // -------------------------------------------------------------------------------
 cv::Mat DogStatus::getCurrentFrame() {
     std::lock_guard<std::mutex> lock(current_frame_mutex);
-    cv::Mat current_frame;
-    if (!curr_frame_buffer.empty()) {
-        current_frame = curr_frame_buffer.front();
-        curr_frame_buffer.pop();
-    }
-    return current_frame;
+    return curr_frame.clone();
 }
 
 // -------------------------------------------------------------------------------
 void DogStatus::setCurrentFrame(cv::Mat current_frame) {    
     std::lock_guard<std::mutex> lock(current_frame_mutex);
-    curr_frame_buffer.push(current_frame);
+    curr_frame = current_frame;
 }
 
 

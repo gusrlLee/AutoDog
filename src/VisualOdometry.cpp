@@ -30,8 +30,6 @@ void VisualOdometry::addFrame(cv::Mat frame) {
         // And transform ready_status 
         is_ready = true;
     }
-    count++;
-    std::cout << "receive frame = " << count << std::endl;
 }
 
 cv::Mat VisualOdometry::getMatchedFrame() {

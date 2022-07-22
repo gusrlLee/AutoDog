@@ -1,5 +1,5 @@
-#ifndef __VISUAL_ODOMETRY__
-#define __VISUAL_ODOMETRY__
+#ifndef VISUAL_ODOMETRY_H
+#define VISUAL_ODOMETRY_H
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/features2d.hpp>
@@ -11,7 +11,8 @@
 #include <math.h>
 
 
-class VisualOdometry {
+class VisualOdometry 
+{
     public:
         VisualOdometry();
         ~VisualOdometry();
@@ -21,7 +22,6 @@ class VisualOdometry {
         cv::Mat getMatchedFrame();
         
     private:
-
         // use Optical Flow 
         std::vector<cv::Point2f> prev_points, curr_points;
         std::vector<uchar> status;
@@ -36,11 +36,6 @@ class VisualOdometry {
         // temp calibration data 
         double focal_length = 707.0912;
         cv::Point2d principal_point;
-
-        // Essential Matrix 
-        // cv::Mat E;
-        // inlier_mask 
-        // cv::Mat inlier_mask;
 
         cv::Mat display = cv::Mat::zeros(1000, 1000, CV_8UC3);
         cv::Mat camera_pose = cv::Mat::eye(4, 4, CV_64F);
@@ -57,4 +52,4 @@ class VisualOdometry {
     
 };
 
-#endif // __VISUAL_ODOMETRY__
+#endif // VISUAL_ODOMETRY_H
