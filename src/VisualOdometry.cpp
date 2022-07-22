@@ -1,63 +1,69 @@
 #include "VisualOdometry.h"
 
 VisualOdometry::VisualOdometry() {
-    this->orb_detector = cv::ORB::create();
-    this->descriptor = cv::ORB::create();
-    this->matcher = cv::DescriptorMatcher::create("BruteForce-Hamming");
+    this->principal_point = cv::Point2d(601.8873, 183.1104);
+    // intrincis camera data  
+    K = (cv::Mat_<double>(3, 3) << focal_length, 0,             principal_point.x, 
+                                   0,            focal_length,  principal_point.y,
+                                   0,            0,             1);
 }
 
 void VisualOdometry::addFrame(cv::Mat frame) {
+    cv::Mat frame_buf;
     if ( is_ready ) {
         // save prev information 
-        prev_frame = curr_frame.clone();
-        prev_keypoints = curr_keypoints;
-        prev_descriptors = curr_descriptors.clone();
+        cv::cvtColor(frame, frame_buf, cv::COLOR_BGR2GRAY);
+        prev_gray_frame = curr_gray_frame.clone();
+        prev_points = curr_points;
 
-        curr_frame = frame.clone();
+        curr_gray_frame = frame_buf.clone();
         extractKeyPoints();
         computeDescriptors();
-        featureMatching();
+        poseEstimationPnP();
     }
     else {
         // make prev_information
-        curr_frame = frame.clone();
+        cv::cvtColor(frame, frame_buf, cv::COLOR_BGR2GRAY);
+
+        curr_gray_frame = frame_buf.clone();
         extractKeyPoints();
-        computeDescriptors();
         // And transform ready_status 
         is_ready = true;
     }
+    count++;
+    std::cout << "receive frame = " << count << std::endl;
 }
 
 cv::Mat VisualOdometry::getMatchedFrame() {
-    return frame_good_match;
+    return display;
 }
 
 void VisualOdometry::extractKeyPoints() {
-    orb_detector->detect(curr_frame, curr_keypoints);
+    cv::goodFeaturesToTrack(curr_gray_frame, curr_points, 2000, 0.01, 10);
 }
 
 void VisualOdometry::computeDescriptors() {
-    orb_detector->compute(curr_frame, curr_keypoints, curr_descriptors);
+    cv::calcOpticalFlowPyrLK(prev_gray_frame, curr_gray_frame, prev_points, curr_points, status, err );
 }
 
-void VisualOdometry::featureMatching() {
-    std::vector<cv::DMatch> matches;
-    // select the candidates in map
-    matcher->match(curr_descriptors, prev_descriptors, matches);
+void VisualOdometry::poseEstimationPnP() {
 
-    // extract good match 
-    auto min_max = minmax_element(matches.begin(), matches.end(),
-                            [](const cv::DMatch &m1, const cv::DMatch &m2) { return m1.distance < m2.distance; });
-    double min_dist = min_max.first->distance;
-    double max_dist = min_max.second->distance;
+    cv::Mat E, inlier_mask;
+    // Essential matrix 
+    E = cv::findEssentialMat(prev_points, curr_points, focal_length, principal_point, cv::RANSAC, 0.99, 1, inlier_mask);
 
-    std::vector<cv::DMatch> good_matches;
-    for (int i = 0; i < curr_descriptors.rows; i++) {
-        if (matches[i].distance <= std::max(2 * min_dist, 30.0)) {
-            good_matches.push_back(matches[i]);
-        }
+    // Rotation matrix and Translation matrix 
+    cv::Mat R, t;
+    // SVD and R, T extract
+    int inlier_num = cv::recoverPose(E, prev_points, curr_points, R, t, focal_length, principal_point, inlier_mask);
+
+    if(inlier_num > min_inlier_num) {
+        cv::Mat T = cv::Mat::eye(4, 4, R.type());
+        T(cv::Rect(0, 0, 3, 3)) = R * 1.0;
+        T.col(3).rowRange(0, 3) = t * 1.0;
+        camera_pose = camera_pose * T.inv();
     }
 
-    // for debug 
-    cv::drawMatches(curr_frame, curr_keypoints, prev_frame, prev_keypoints, good_matches, frame_good_match);
+    cv::Point2d camera_point((int)camera_pose.at<double>(0, 3), (int)camera_pose.at<double>(2, 3));
+    cv::drawMarker(display, cv::Point(camera_point.x + 500, camera_point.y + 500), cv::Scalar(0, 0, 255), cv::MARKER_SQUARE, 5, 2);
 }

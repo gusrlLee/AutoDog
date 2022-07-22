@@ -27,6 +27,7 @@ int main(int argc, char* argv[]) {
     const char* calibration_data_file = nullptr;
     const char* camera_path = nullptr;
     const char* file_path = "../Data/07/image_0/%06d.png";
+    //const char* file_path = "../Data/highway.mp4";
     
     std::cout << "==========================System Information===========================" << std::endl;
     std::cout << "Simulation Mode = " << simulation_mode << std::endl;
