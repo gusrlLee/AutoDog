@@ -9,9 +9,6 @@ MainSystem::MainSystem(bool mode)
     dog_status = new DogStatus(); 
     vo = new VisualOdometry();
 
-    // make thread 
-    std::thread traj_compute_thread(&MainSystem::trajectoryComputeThread, vo, dog_status);
-
     printf("Initialization Main System...\n");
 }
 
@@ -45,6 +42,9 @@ void MainSystem::startProgram()
 {
     // start program 
     dog_status->setSystemStatus(true);
+    // make thread 
+    std::thread traj_compute_thread(&MainSystem::trajectoryComputeThread, vo, dog_status);
+
     while (true) 
     {
         cv::Mat current_frame = dog_status->getCurrentFrame();
