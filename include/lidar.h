@@ -11,6 +11,7 @@
 #include "sl_lidar.h" 
 #include "sl_lidar_driver.h"
 
+using namespace rp::standalone::rplidar;
 
 class Lidar 
 {
@@ -28,5 +29,5 @@ class Lidar
             ctrl_c_pressed = true;
         }
 
-}
+};
 #endif // LIDAR_H
