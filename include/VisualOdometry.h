@@ -1,15 +1,14 @@
 #ifndef VISUAL_ODOMETRY_H
 #define VISUAL_ODOMETRY_H
 
-#include <opencv2/opencv.hpp>
-#include <opencv2/features2d.hpp>
-
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <string>
 #include <math.h>
 
+#include <opencv2/opencv.hpp>
+#include <opencv2/features2d.hpp>
 
 class VisualOdometry 
 {
@@ -18,17 +17,16 @@ class VisualOdometry
         ~VisualOdometry();
 
         void addFrame(cv::Mat frame);
-        // std::vector<cv::DMatch> getMatchedFeatures();
         cv::Mat getMatchedFrame();
         
     private:
         // use Optical Flow 
         std::vector<cv::Point2f> prev_points, curr_points;
+        cv::Mat err;
         std::vector<uchar> status;
 
         cv::Mat curr_gray_frame;
         cv::Mat prev_gray_frame;
-        cv::Mat err;
 
         // this value, check ready prev_frame 
         bool is_ready = false;
@@ -44,6 +42,7 @@ class VisualOdometry
 
         // calibration Matrix 
         cv::Mat K; 
+        cv::Mat inlier_mask;
         int count=0;
 
         void extractKeyPoints();

@@ -10,23 +10,23 @@ VisualOdometry::VisualOdometry() {
 
 void VisualOdometry::addFrame(cv::Mat frame) {
     cv::Mat frame_buf;
+    cv::cvtColor(frame, frame_buf, cv::COLOR_BGR2GRAY);
     if ( is_ready ) {
-        // save prev information 
-        cv::cvtColor(frame, frame_buf, cv::COLOR_BGR2GRAY);
-        prev_gray_frame = curr_gray_frame.clone();
-        prev_points = curr_points;
-
+        // issue not good matches so connot compute traj 
         curr_gray_frame = frame_buf.clone();
+
+        // compute Visual operation 
         extractKeyPoints();
         computeDescriptors();
         poseEstimationPnP();
+
+        // save prev result information 
+        prev_gray_frame = curr_gray_frame.clone();
     }
+
     else {
         // make prev_information
-        cv::cvtColor(frame, frame_buf, cv::COLOR_BGR2GRAY);
-
-        curr_gray_frame = frame_buf.clone();
-        extractKeyPoints();
+        prev_gray_frame = frame_buf.clone();
         // And transform ready_status 
         is_ready = true;
     }
@@ -37,7 +37,7 @@ cv::Mat VisualOdometry::getMatchedFrame() {
 }
 
 void VisualOdometry::extractKeyPoints() {
-    cv::goodFeaturesToTrack(curr_gray_frame, curr_points, 2000, 0.01, 10);
+    cv::goodFeaturesToTrack(prev_gray_frame, prev_points, 2000, 0.01, 10);
 }
 
 void VisualOdometry::computeDescriptors() {
@@ -46,7 +46,7 @@ void VisualOdometry::computeDescriptors() {
 
 void VisualOdometry::poseEstimationPnP() {
 
-    cv::Mat E, inlier_mask;
+    cv::Mat E;
     // Essential matrix 
     E = cv::findEssentialMat(prev_points, curr_points, focal_length, principal_point, cv::RANSAC, 0.99, 1, inlier_mask);
 
