@@ -10,6 +10,7 @@
 
 #include "DogStatus.h"
 #include "VisualOdometry.h"
+#include "Lidar.h"
 
 class MainSystem 
 {
@@ -21,6 +22,7 @@ class MainSystem
 
         DogStatus *dog_status; // status save space 
         VisualOdometry *vo; // visual odometry 
+        Lidar* lidar;
         
         // threads  
         static void trajectoryComputeThread(VisualOdometry* vo, DogStatus* dog_status);

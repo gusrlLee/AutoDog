@@ -1,11 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
 add_definitions(-D_MACOS)
-    
-set(SDK_INCLUDE_DIR 
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-
 
 add_library(SDK_LIBRARY SHARED 
     src/rplidar_driver.cpp
