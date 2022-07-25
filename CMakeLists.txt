@@ -8,24 +8,23 @@ project(Auto)
 add_subdirectory(lib)
 find_package(OpenCV REQUIRED)
 
+include_directories(
+    ${OpenCV_INCLUDE_DIRS} 
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/config
 
-set ( SDK_INCLUDE_DIR 
+    # sdk library header 
     ${CMAKE_SOURCE_DIR}/lib/sdk/include
     ${CMAKE_SOURCE_DIR}/lib/sdk/src
     ${CMAKE_SOURCE_DIR}/lib/sdk/src/hal
 )
 
-include_directories(
-    ${OpenCV_INCLUDE_DIRS} 
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/config
-    ${SDK_INCLUDE_DIR}
-)
-
-if ( UNIX ) 
-    include_directories(${CMAKE_SOURCE_DIR}/lib/sdk/src/linux)
-elseif ( APPLE )
+if ( APPLE )
+    message("Your OS is MaxOS")
     include_directories(${CMAKE_SOURCE_DIR}/lib/sdk/src/macOS)
+elseif ( UNIX ) 
+    message("Your OS is Linux")
+    include_directories(${CMAKE_SOURCE_DIR}/lib/sdk/src/linux)
 endif()
 
 add_executable(${PROJECT_NAME} 
@@ -38,7 +37,7 @@ add_executable(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} 
     ${OpenCV_LIBS} 
-    ${SDK_LIBRARY}
+    SDK_LIBRARY
     -lpthread
 )
 

@@ -8,6 +8,7 @@ MainSystem::MainSystem(bool mode)
     system_mode = mode;
     dog_status = new DogStatus(); 
     vo = new VisualOdometry();
+    lidar = new Lidar();
 
     printf("Initialization Main System...\n");
 }

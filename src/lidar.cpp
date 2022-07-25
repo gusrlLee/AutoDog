@@ -1,4 +1,5 @@
 #include "lidar.h"
+using namespace rp::standalone::rplidar;
 
 Lidar::Lidar() {
     printf("[Start LiDAR initialization]...\n");
@@ -38,7 +39,7 @@ Lidar::Lidar() {
     }
 }
 
-bool checkSLAMTECLIDARHealth(ILidarDriver* drv) {
+bool Lidar::checkSLAMTECLIDARHealth(ILidarDriver* drv) {
     sl_result     op_result;
     sl_lidar_response_device_health_t healthinfo;
 
