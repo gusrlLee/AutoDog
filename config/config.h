@@ -3,7 +3,7 @@
 
 #define _countof( _Array ) (int)(sizeof(_Array) / sizeof(_Array[0]))
 // Your lidar port in dev 
-#define PORT "/dev/tty.usbserial-0001"
+#define PORT "/dev/ttyUSB0"
 #define SCALE 0.1
 // screen size 
 #define SCREENX 800

@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 add_compile_options( -g )
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -32,7 +33,7 @@ add_executable(${PROJECT_NAME}
     src/DogStatus.cpp
     src/VisualOdometry.cpp
     src/MainSystem.cpp
-    src/lidar.cpp
+    src/Lidar.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} 

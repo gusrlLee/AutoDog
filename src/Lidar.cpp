@@ -1,4 +1,5 @@
-#include "lidar.h"
+#include "Lidar.h"
+
 using namespace rp::standalone::rplidar;
 
 Lidar::Lidar() {
@@ -35,6 +36,7 @@ Lidar::Lidar() {
     if (checkSLAMTECLIDARHealth(drv)) {
         drv->setMotorSpeed();
         // start Sacnning 
+        printf("Success Initialization LiDAR.\n");
         drv->startScan(0, 1);
     }
 }
