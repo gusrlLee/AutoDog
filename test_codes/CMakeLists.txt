@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
-project(VO)
+project(image_capture)
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
-add_executable(${PROJECT_NAME} Visual_odometry.cpp)
+add_executable(${PROJECT_NAME} image_capture_program.cpp)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
