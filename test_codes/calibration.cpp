@@ -9,7 +9,7 @@ int main(int argc, char** argv){
     (void)argv;
 
     std::vector<cv::String> fileNames;
-    cv::glob("../check_image/*.jpeg", fileNames, false);
+    cv::glob("../checkimage_dataset1/*.png", fileNames, false);
     cv::Size patternSize(10 - 1, 7 - 1);
     std::vector<std::vector<cv::Point2f>> q(fileNames.size());
 
@@ -63,6 +63,7 @@ int main(int argc, char** argv){
     std::vector<cv::Mat> rvecs, tvecs;
     std::vector<double> stdIntrinsics, stdExtrinsics, perViewErrors;
     int flags = cv::CALIB_FIX_ASPECT_RATIO + cv::CALIB_FIX_K3 + cv::CALIB_ZERO_TANGENT_DIST + cv::CALIB_FIX_PRINCIPAL_POINT;
+    // frame size = 1280 720 
     cv::Size frameSize(4032, 3024);
 
     std::cout << "Calibrating . . . " << std::endl;
