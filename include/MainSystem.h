@@ -19,6 +19,7 @@ class MainSystem
         // false -> simulation mode 
         bool system_mode = false;
         int stat;
+        scanData_t current_scan_data[8192];
 
         DogStatus *dog_status; // status save space 
         VisualOdometry *vo; // visual odometry 
@@ -26,6 +27,7 @@ class MainSystem
         
         // threads  
         static void trajectoryComputeThread(VisualOdometry* vo, DogStatus* dog_status);
+        static void detectScanDataThread(Lidar* lidar, DogStatus* dog_status);
         
     public:
         MainSystem(bool mode);

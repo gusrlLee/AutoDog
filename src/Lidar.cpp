@@ -7,7 +7,7 @@ Lidar::Lidar() {
 
     float temp;
     drv = *createLidarDriver();
-    
+
     if ( !drv ) {
         fprintf(stderr, "[ERROR] insufficent memory, exit!\n");
         exit(-2);
@@ -64,3 +64,41 @@ bool Lidar::checkSLAMTECLIDARHealth(ILidarDriver* drv) {
     }
 }
 
+void Lidar::transformTheta(const float theta, double* output_array) {
+    double x_theta = 0;
+    double y_theta = 0;
+
+    if(0 <= theta && theta < 90){
+        x_theta = sin(theta*(PI/180));
+        y_theta = -1 * (cos(theta*(PI/180)));
+
+    }
+    else if(90 <= theta && theta < 180){
+        x_theta = cos((theta - 90) * (PI/180));
+        y_theta = sin((theta - 90) * (PI/180));
+
+    }
+    else if(180 <= theta && theta < 270) {
+        x_theta = -1 * sin((theta - 180) * (PI/180));
+        y_theta = cos((theta - 180.f) * (PI/180));
+
+    } 
+    else {
+        x_theta = -1 * cos((theta - 270) * (PI/180));
+        y_theta = -1 * sin((theta - 270) * (PI/180));
+    }
+
+    output_array[0] = x_theta;
+    output_array[1] = y_theta;
+    return;
+}
+
+void Lidar::getScanLidarData(scanData_t& nodes) {
+    size_t count = _countof(nodes);
+    sl_result op_result = drv->grabScanDataHq(nodes, count);
+
+    // get Data scan data 
+    if ( SL_IS_OK(op_result) ) {
+        drv->ascendScanData(nodes, count);
+    }
+}

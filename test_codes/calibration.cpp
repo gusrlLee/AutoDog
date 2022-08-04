@@ -64,7 +64,7 @@ int main(int argc, char** argv){
     std::vector<double> stdIntrinsics, stdExtrinsics, perViewErrors;
     int flags = cv::CALIB_FIX_ASPECT_RATIO + cv::CALIB_FIX_K3 + cv::CALIB_ZERO_TANGENT_DIST + cv::CALIB_FIX_PRINCIPAL_POINT;
     // frame size = 1280 720 
-    cv::Size frameSize(4032, 3024);
+    cv::Size frameSize(1280, 720);
 
     std::cout << "Calibrating . . . " << std::endl;
     std::cout << "Q is size = " << Q.size() << " q size is = " << q.size() << std::endl;

@@ -15,17 +15,22 @@
 
 using namespace rp::standalone::rplidar;
 
+typedef sl_lidar_response_measurement_node_hq_t scanData_t;
+
 class Lidar 
 {
     public:
         Lidar();
+        // get lidar data 
+        void getScanLidarData(scanData_t& nodes);
 
     private:
+
         bool ctrl_c_pressed = false;
 
         IChannel* _channel;
         sl_result     op_result;
-        ILidarDriver * drv;
+        ILidarDriver* drv;
         sl_lidar_response_device_info_t devinfo;
         bool connectSuccess = false;
 
@@ -34,7 +39,7 @@ class Lidar
             ctrl_c_pressed = true;
         }
 
+        void transformTheta(const float theta, double* output_array);
         static inline void delay( _word_size_t ms ) { }
-
 };
 #endif // LIDAR_H
