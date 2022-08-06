@@ -1,7 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define _countof( _Array ) (int)(sizeof(_Array) / sizeof(_Array[0]))
 // Your lidar port in dev 
 #define PORT "/dev/ttyUSB0"
 #define SCALE 0.1
@@ -16,6 +15,6 @@
 // PI 
 #define PI 3.14
 // transform ratio
-#define PIXEL_RATIO 0.1
+#define PIXEL_RATIO 0.01
 
 #endif // CONFIG_H

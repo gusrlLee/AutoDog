@@ -17,7 +17,7 @@ class VisualOdometry
         ~VisualOdometry();
 
         void addFrame(cv::Mat frame);
-        cv::Mat getMatchedFrame();
+        cv::Point2d getCurrentLocation();
         
     private:
         // use Optical Flow 
@@ -27,6 +27,8 @@ class VisualOdometry
 
         cv::Mat curr_gray_frame;
         cv::Mat prev_gray_frame;
+
+        cv::Point2d current_location;
 
         // this value, check ready prev_frame 
         bool is_ready = false;

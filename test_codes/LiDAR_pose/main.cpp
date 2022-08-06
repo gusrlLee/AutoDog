@@ -143,6 +143,7 @@ int main(int argc, char** argv){
                     
                     int x = int((nodes[pos].dist_mm_q2/4.0f) * theta_array[0] * PIXEL_RATIO);
                     int y = int((nodes[pos].dist_mm_q2/4.0f) * theta_array[1] * PIXEL_RATIO);
+
                     // std::cout << "x : " << x << " y : " << y << std::endl;
                     std::cout << "theta_array " << theta_array[0] << " " << theta_array[1] << "\n";
                     

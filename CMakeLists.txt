@@ -33,7 +33,6 @@ add_executable(${PROJECT_NAME}
     src/DogStatus.cpp
     src/VisualOdometry.cpp
     src/MainSystem.cpp
-    src/Lidar.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} 

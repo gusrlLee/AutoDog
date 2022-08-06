@@ -32,8 +32,8 @@ void VisualOdometry::addFrame(cv::Mat frame) {
     }
 }
 
-cv::Mat VisualOdometry::getMatchedFrame() {
-    return display;
+cv::Point2d VisualOdometry::getCurrentLocation() {
+    return current_location;
 }
 
 void VisualOdometry::extractKeyPoints() {
@@ -62,6 +62,8 @@ void VisualOdometry::poseEstimationPnP() {
         camera_pose = camera_pose * T.inv();
     }
 
-    cv::Point2d camera_point((int)camera_pose.at<double>(0, 3), (int)camera_pose.at<double>(2, 3));
-    cv::drawMarker(display, cv::Point(camera_point.x + 500, camera_point.y + 500), cv::Scalar(0, 0, 255), cv::MARKER_SQUARE, 5, 2);
+    this->current_location = cv::Point2d((int)camera_pose.at<double>(0, 3), (int)camera_pose.at<double>(2, 3));
+
+    // cv::Point2d camera_point((int)camera_pose.at<double>(0, 3), (int)camera_pose.at<double>(2, 3));
+    // cv::drawMarker(display, cv::Point(camera_point.x + 500, camera_point.y + 500), cv::Scalar(0, 0, 255), cv::MARKER_SQUARE, 5, 2);
 }

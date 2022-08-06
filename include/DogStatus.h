@@ -1,12 +1,18 @@
 #ifndef DOG_STATUS_H
 #define DOG_STATUS_H
 
-#include <opencv2/opencv.hpp>
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <string>
 #include <queue>
+
+#include <opencv2/opencv.hpp>
+#include <opencv2/features2d.hpp>
+// for lidar 
+#include "rplidar.h"
+#include "sl_lidar.h" 
+#include "sl_lidar_driver.h"
 
 class DogStatus {
     private:
@@ -16,6 +22,13 @@ class DogStatus {
         
         bool is_working;
         std::mutex is_working_mutex;
+
+        std::mutex current_traj_mutex;
+        std::vector<cv::Point2f> current_traj;
+
+        std::mutex current_scan_data_mutex;
+        std::vector<sl_lidar_response_measurement_node_hq_t> current_scan_data;
+
         
     public:
         DogStatus();
@@ -26,8 +39,13 @@ class DogStatus {
         bool getSystemStatus();
         void setSystemStatus(bool flag);
         
-        void getTrajData();
-        void setTrajData();
+        // Trajectory data
+        void setTrajData(std::vector<cv::Point2f> current_traj_data);
+        std::vector<cv::Point2f> getTrajData();
+
+        // LiDAR data
+        void setScanData(std::vector<sl_lidar_response_measurement_node_hq_t> current_lidar_scan_data, size_t count);
+        std::vector<sl_lidar_response_measurement_node_hq_t> getScanData();
 
 };
 

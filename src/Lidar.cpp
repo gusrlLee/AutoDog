@@ -93,12 +93,14 @@ void Lidar::transformTheta(const float theta, double* output_array) {
     return;
 }
 
-void Lidar::getScanLidarData(scanData_t& nodes) {
-    size_t count = _countof(nodes);
+void Lidar::getScanLidarData(scanData_t* nodes, size_t count) {
     sl_result op_result = drv->grabScanDataHq(nodes, count);
 
     // get Data scan data 
     if ( SL_IS_OK(op_result) ) {
         drv->ascendScanData(nodes, count);
     }
+//    for (int pos = 0; pos < (int)count ; ++pos) {
+//        printf("theta: %03.2f Dist: %08.2f\n", (nodes[pos].angle_z_q14 * 90.f) / 16384.f, nodes[pos].dist_mm_q2/4.0f);
+//    }
 }

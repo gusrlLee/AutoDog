@@ -22,7 +22,7 @@ class Lidar
     public:
         Lidar();
         // get lidar data 
-        void getScanLidarData(scanData_t& nodes);
+        void getScanLidarData(scanData_t* nodes, size_t count);
 
     private:
 
