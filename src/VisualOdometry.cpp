@@ -1,5 +1,19 @@
+/**
+ * @file VisualOdometry.cpp
+ * @author gusrlLee (gusrlLee@github.com)
+ * @brief 
+ * @version 0.1
+ * @date 2022-08-06
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include "VisualOdometry.h"
 
+/**
+ * @brief Construct a new Visual Odometry:: Visual Odometry object
+ * 
+ */
 VisualOdometry::VisualOdometry() {
     this->principal_point = cv::Point2d(601.8873, 183.1104);
     // intrincis camera data  
@@ -8,6 +22,11 @@ VisualOdometry::VisualOdometry() {
                                    0,            0,             1);
 }
 
+/**
+ * @brief Trajectory data를 만들어주는 method. 
+ * 
+ * @param frame : current Frame  
+ */
 void VisualOdometry::addFrame(cv::Mat frame) {
     cv::Mat frame_buf;
     cv::cvtColor(frame, frame_buf, cv::COLOR_BGR2GRAY);
@@ -32,18 +51,37 @@ void VisualOdometry::addFrame(cv::Mat frame) {
     }
 }
 
+/**
+ * @brief Visual odoemtry에서 진행 된 location을 획득 하는 method
+ * 
+ * @return * cv::Point2d : current_dog_location 
+ */
 cv::Point2d VisualOdometry::getCurrentLocation() {
     return current_location;
 }
 
+/**
+ * @brief feature detection between prev_frame and current_frame 
+ * 
+ * @return * void 
+ */
 void VisualOdometry::extractKeyPoints() {
     cv::goodFeaturesToTrack(prev_gray_frame, prev_points, 2000, 0.01, 10);
 }
 
+/**
+ * @brief 찾아진 prev_keypoints 와 current_keypoints를 가지고 descriptor를 계산. 
+ * 
+ * @return * void 
+ */
 void VisualOdometry::computeDescriptors() {
     cv::calcOpticalFlowPyrLK(prev_gray_frame, curr_gray_frame, prev_points, curr_points, status, err );
 }
 
+/**
+ * @brief 찾아진 descriptor를 가지고 Essential Matrix, 그리고 그것에 대한 recoverPose를 구하여 location 계산. 
+ * 
+ */
 void VisualOdometry::poseEstimationPnP() {
 
     cv::Mat E;
