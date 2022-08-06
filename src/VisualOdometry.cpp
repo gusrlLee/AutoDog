@@ -79,7 +79,7 @@ void VisualOdometry::computeDescriptors() {
 }
 
 /**
- * @brief 찾아진 descriptor를 가지고 Essential Matrix, 그리고 그것에 대한 recoverPose를 구하여 location 계산. 
+ * @brief 찾아진 descriptor를 가지고 Essential Matrix, 그리고 그것에 대한 recoverPose를 구하여 location 계산.w 
  * 
  */
 void VisualOdometry::poseEstimationPnP() {
