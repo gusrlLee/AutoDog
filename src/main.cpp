@@ -1,4 +1,14 @@
 // VERSION 1.0
+/**
+ * @file main.cpp
+ * @author hyeon ki (gusrlLee@github.com)
+ * @brief 
+ * @version 0.1
+ * @date 2022-08-06
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include <iostream>
 #include <thread>
 #include <mutex>
@@ -12,7 +22,7 @@ const char* keys = {" \\
     {c | false | this option is Camera Mode. } \\ 
     {s | false  | this option is Simulation Mode. }"};
 
-// MAIN SYSTEM 
+// MAIN SYSTEM =============================================================================================================== 
 int main(int argc, char* argv[]) {
     cv::CommandLineParser parser(argc, argv, std::string(keys));
     parser.about("AutoDog System v1.0.0");
@@ -43,17 +53,6 @@ int main(int argc, char* argv[]) {
 
     MainSystem* main_system = new MainSystem(simulation_mode);
     main_system->startProgram();
-
-//    // create Dog Status
-//    DogStatus* dog_status = new DogStatus();
-//    
-//    // process 
-//    std::thread camera_capture_thread(cameraCaptureThread, dog_status);
-//    std::thread traj_compute_thread(trajComputeThread, dog_status);
-//
-//    // wait exit 
-//    camera_capture_thread.join();
-//    traj_compute_thread.join();
 
     return 0;
 }

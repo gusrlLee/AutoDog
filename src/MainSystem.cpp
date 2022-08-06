@@ -1,3 +1,13 @@
+/**
+ * @file MainSystem.cpp
+ * @author gusrlLee 
+ * @brief 
+ * @version 0.1
+ * @date 2022-08-06
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include <stdio.h>
 #include <time.h>
 
@@ -6,7 +16,11 @@
 
 using namespace rp::standalone::rplidar;
 
-// camera mode constructor 
+/**
+ * @brief Construct a new Main System:: Main System object
+ * 
+ * @param mode : camrea mode 와 simulation 모드를 선택. 
+ */
 MainSystem::MainSystem(bool mode) {
     printf("Initialization Main System...\n");
     // create ptr
@@ -52,6 +66,13 @@ MainSystem::MainSystem(bool mode) {
     }
 }
 
+/**
+ * @brief Visual Odometry에 대한 연산을 진행하는 Thread code 
+ * 
+ * @param vo : MainSystem에서 생성된 Visual odoemtry class에 대한 ptr 
+ * @param dog_status : 현재 Dog의 상태를 저장하는 shared data ptr 
+ * @remark static으로 private안에 생성 됨. 
+ */
 void MainSystem::trajectoryComputeThread( VisualOdometry* vo, DogStatus* dog_status ) {
     //const char* file_path = "../Data/highway.mp4";
     const char* file_path = "../Data/07/image_0/%06d.png";
@@ -83,6 +104,13 @@ void MainSystem::trajectoryComputeThread( VisualOdometry* vo, DogStatus* dog_sta
     }
 }
 
+/**
+ * @brief LIDAR가 받아온 데이터로 우리의 scan Data를 handling하는 thread code 
+ * 
+ * @param lidar : RPLiDAR A1의 sdk에서 선언 된 class를 이용하여 생성 한 LiDAR ptr
+ * @param dog_status : 현재 Dog의 상태를 저장하는 shared data ptr 
+ * @remark static으로 private안에 생성 됨. 
+ */
 void MainSystem::detectScanDataThread(ILidarDriver* lidar, DogStatus* dog_status) {
     sl_result op_result; // bool 
 
@@ -111,6 +139,10 @@ void MainSystem::detectScanDataThread(ILidarDriver* lidar, DogStatus* dog_status
     lidar->setMotorSpeed(0);
 }
 
+/**
+ * @brief main에서 호출되는 System start call method 
+ * 
+ */
 void MainSystem::startProgram() {
     // start program 
     // threads 
@@ -166,6 +198,13 @@ void MainSystem::startProgram() {
     traj_compute_thread.join();
 }
 
+/**
+ * @brief LiDAR의 현재 상태를 확인해 주는 method MainSystem에서 LiDAR 객체를 생성할 때 상태 체크.
+ * 
+ * @param drv : status를 check할 LiDAR의 ptr
+ * @return true : available
+ * @return false : not available
+ */
 bool MainSystem::checkSLAMTECLIDARHealth(ILidarDriver * drv)
 {
     sl_result     op_result;
@@ -189,6 +228,12 @@ bool MainSystem::checkSLAMTECLIDARHealth(ILidarDriver * drv)
     }
 }
 
+/**
+ * @brief 라이다에서 받아온 theta를 가지고 좌표계 상에서 표현할 수 있는 좌표로 만들어 줌.  
+ * 
+ * @param theta : Rotation 될 각도.
+ * @param output_array : output
+ */
 void MainSystem::transformTheta(const float theta, double* output_array){
     double x_theta = 0;
     double y_theta = 0;
