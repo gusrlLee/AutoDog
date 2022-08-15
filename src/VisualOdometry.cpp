@@ -23,7 +23,7 @@ VisualOdometry::VisualOdometry() {
 }
 
 /**
- * @brief Trajectory data를 만들어주는 method. 
+ * @brief This function computes frame that input argument, on our Visual odoemetry algorithm  
  * 
  * @param frame : current Frame  
  */
@@ -79,7 +79,7 @@ void VisualOdometry::computeDescriptors() {
 }
 
 /**
- * @brief 찾아진 descriptor를 가지고 Essential Matrix, 그리고 그것에 대한 recoverPose를 구하여 location 계산.w 
+ * @brief 찾아진 descriptor를 가지고 Essential Matrix, 그리고 그것에 대한 recoverPose를 구하여 location 계산.
  * 
  */
 void VisualOdometry::poseEstimationPnP() {

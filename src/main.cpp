@@ -9,6 +9,7 @@
  * @copyright Copyright (c) 2022
  * 
  */
+
 #include <iostream>
 #include <thread>
 #include <mutex>
@@ -18,40 +19,43 @@
 #include "MainSystem.h"
 
 const char* keys = {" \\ 
-    {help h ? | | this is help. } \\ 
-    {c | false | this option is Camera Mode. } \\ 
-    {s | false  | this option is Simulation Mode. }"};
+    {help h ?            |       | this is help. } \\ 
+    {real-mode           |       | this option is Real Mode. } \\
+    {simulation-mode     |       | this option is Simulation Mode. }"};
+
+void printSystemInformation(bool mode) {
+    printf("==========================System Information===========================\n");
+    printf("System Mode = %s\n", mode ? "Real Mode" : "Simulation Mode" );
+    printf("Auto System Start...\n");
+    printf("=======================================================================\n\n");
+}
 
 // MAIN SYSTEM =============================================================================================================== 
 int main(int argc, char* argv[]) {
+    // if system mode true, system mode is RealMode 
+    // else system mode is simulationMode      
+    bool system_mode = false;
+
     cv::CommandLineParser parser(argc, argv, std::string(keys));
     parser.about("AutoDog System v1.0.0");
     if ( parser.has("help")) {
         parser.printMessage();
         return 0;
     }
-
-    if ( argc < 2 ){
+    else if (argc < 2){
         parser.printMessage();
         return 0;
     }
+    else if (parser.has("real-mode")) {
+        system_mode = true; // Real mode 
+    }
+    else if (parser.has("simulation-mode")){
+        system_mode = false; // simulation mode 
+    }
 
-    // mode option and camera calibration data 
-    bool simulation_mode = parser.get<bool>("s");
-    bool camera_mode = parser.get<bool>("c");
+    printSystemInformation(system_mode);
 
-    const char* calibration_data_file = nullptr;
-    const char* camera_path = nullptr;
-    const char* file_path = "../Data/07/image_0/%06d.png";
-    
-    printf("==========================System Information===========================\n");
-    printf("System Mode = %s\n", simulation_mode ? "Simulation Mode" : "Camera Mode");
-    printf("Camera Path = \n");
-    printf("Camera Calibration data file path = \n");
-    printf("Auto System Start...\n");
-    printf("=======================================================================\n\n");
-
-    MainSystem* main_system = new MainSystem(simulation_mode);
+    MainSystem* main_system = new MainSystem(system_mode);
     main_system->startProgram();
 
     return 0;
