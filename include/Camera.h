@@ -1,19 +1,25 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <iostream>
-#include "opencv2/opencv.hpp"
+#include "common_header.h"
 
 class Camera {
   public:
-    Camera() {}
-    Camera(double focal_length, cv::Point2d principar_point);
+    // constructor 
+    Camera(std::string camera_path, double focal_length, cv::Point2d principar_point);
 
-  public:
-    cv::Mat_<double> m_K;
-    cv::Point2d m_principal_point;
-    cv::Mat m_camera_pose;
-    cv::Point2d camera_current_location;
+    std::string cameraPath() { return camera_path_; }
+    double focalLength() { return focal_length_; }
+    cv::Point2d principalPoints() { return principal_point_; }
+
+  private:
+    double focal_length_;
+    cv::Point2d principal_point_;
+    cv::Point2d camera_current_location_;
+
+    cv::Mat camera_pose_;
+    std::string camera_path_;
+  
 };
 
 #endif

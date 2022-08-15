@@ -12,7 +12,7 @@ find_package(OpenCV REQUIRED)
 include_directories(
     ${OpenCV_INCLUDE_DIRS} 
     ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/config
+    ${CMAKE_SOURCE_DIR}/
 
     # sdk library header 
     ${CMAKE_SOURCE_DIR}/lib/sdk/include
@@ -32,7 +32,9 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     src/DogStatus.cpp
     src/VisualOdometry.cpp
-    src/MainSystem.cpp
+    src/CentralSystem.cpp
+    src/Camera.cpp
+    src/Lidar.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} 

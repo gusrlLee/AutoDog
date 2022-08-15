@@ -14,12 +14,14 @@
  * @brief Construct a new Visual Odometry:: Visual Odometry object
  * 
  */
-VisualOdometry::VisualOdometry() {
-    this->principal_point = cv::Point2d(601.8873, 183.1104);
+VisualOdometry::VisualOdometry(std::shared_ptr<Camera> camera) {
+    focal_length = camera->focalLength();
+    principal_point = camera->principalPoints();
+    
     // intrincis camera data  
-    K = (cv::Mat_<double>(3, 3) << focal_length, 0,             principal_point.x, 
-                                   0,            focal_length,  principal_point.y,
-                                   0,            0,             1);
+    K = (cv::Mat_<double>(3, 3) << focal_length  , 0,             principal_point.x, 
+                                   0,              focal_length,  principal_point.y,
+                                   0,              0,             1);
 }
 
 /**

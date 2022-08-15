@@ -4,7 +4,6 @@
         - Camera Capture thread 
             - DogStatus  
             - camrea 
-            - visual odometry
 
         - LiDAR scan data thread 
             - DogStatus  
@@ -25,6 +24,8 @@
     - Camera
         - Camera Pose
         - Frame Processer 
+    
+    - Visual Odometry
         - K matrix (focal length, center_point) 
 
     - LiDAR
@@ -35,7 +36,6 @@
     - Legs
         - moters of arduino control
         - Serial comunicate between Jetson Nano and Arduino
-        -  
 
     - DogStatus  
         - All of Main System information 
