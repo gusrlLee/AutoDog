@@ -44,7 +44,7 @@ class CentralSystem {
 
 
     static void cameraCaptureThread(std::shared_ptr<Camera> camera, std::shared_ptr<DogStatus> dog_status);
-    static void computeTrajectoryThread(std::shared_ptr<VisualOdometry> vo, std::shared_ptr<DogStatus> dog_status);
+    static void computeTrajectoryThread(std::shared_ptr<Camera> camera, std::shared_ptr<VisualOdometry> vo, std::shared_ptr<DogStatus> dog_status);
     static void scanLidarThread(std::shared_ptr<Lidar> lidar, std::shared_ptr<DogStatus> dog_status);
 
     // later ....

@@ -22,6 +22,7 @@ VisualOdometry::VisualOdometry(std::shared_ptr<Camera> camera) {
     K = (cv::Mat_<double>(3, 3) << focal_length  , 0,             principal_point.x, 
                                    0,              focal_length,  principal_point.y,
                                    0,              0,             1);
+    
 }
 
 /**
@@ -85,7 +86,6 @@ void VisualOdometry::computeDescriptors() {
  * 
  */
 void VisualOdometry::poseEstimationPnP() {
-
     cv::Mat E;
     // Essential matrix 
     E = cv::findEssentialMat(prev_points, curr_points, focal_length, principal_point, cv::RANSAC, 0.99, 1, inlier_mask);
@@ -101,7 +101,6 @@ void VisualOdometry::poseEstimationPnP() {
         T.col(3).rowRange(0, 3) = t * 1.0;
         camera_pose = camera_pose * T.inv();
     }
-
     this->current_location = cv::Point2d((int)camera_pose.at<double>(0, 3), (int)camera_pose.at<double>(2, 3));
 
     // cv::Point2d camera_point((int)camera_pose.at<double>(0, 3), (int)camera_pose.at<double>(2, 3));
