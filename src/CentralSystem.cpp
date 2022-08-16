@@ -6,11 +6,11 @@ CentralSystem::CentralSystem(bool mode, bool use_lidar) {
     printf("[SYSTEM]: Initialization Camera....");
     if ( mode ) { // Real Mode 
         cv::Point2d center_point = cv::Point2d(639.5, 359.5);
-        camera_ = std::make_shared<Camera>(CAMERA_PATH, REAL_FOCAL_LENGTH, center_point);
+        camera_ = std::make_shared<Camera>(CAMERA_PATH, REAL_FOCAL_LENGTH, center_point, mode);
     }
     else { // simulation mode 
         cv::Point2d center_point = cv::Point2d(601.8873, 183.1104);
-        camera_ = std::make_shared<Camera>(SIMULATION_DATA_PATH, SIMUL_FOCAL_LENGTH, center_point);
+        camera_ = std::make_shared<Camera>(SIMULATION_DATA_PATH, SIMUL_FOCAL_LENGTH, center_point, mode);
     }
     printf("\t[OK]\n");
 
