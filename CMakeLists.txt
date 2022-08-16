@@ -30,11 +30,12 @@ endif()
 
 add_executable(${PROJECT_NAME} 
     src/main.cpp
+    src/CentralSystem.cpp
     src/DogStatus.cpp
     src/VisualOdometry.cpp
-    src/CentralSystem.cpp
     src/Camera.cpp
     src/Lidar.cpp
+    src/MotorControlSystem.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} 

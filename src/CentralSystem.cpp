@@ -18,7 +18,7 @@ CentralSystem::CentralSystem(bool mode, bool use_lidar) {
     // LiDAR init 
     if (use_lidar_){
         printf("[SYSTEM]: Initialization LiDAR....");
-        lidar_ = std::make_shared<Lidar>(PORT, BAUDRATE);
+        lidar_ = std::make_shared<Lidar>(LIDAR_PORT, LIDAR_BAUDRATE);
         printf("\t[OK]\n");
     }
 
@@ -30,6 +30,10 @@ CentralSystem::CentralSystem(bool mode, bool use_lidar) {
     // visual odometry init
     printf("[SYSTEM]: Initialization Visual Odometry....");
     vo_ = std::make_shared<VisualOdometry>(camera_);
+    printf("\t[OK]\n");
+
+    printf("[SYSTEM]: Initialization Motor Control System....");
+    motor_control_system_ = std::make_shared<MotorControlSystem>(UART_PORT, UART_BAUDRATE);
     printf("\t[OK]\n");
 
     system_status_ = true;
@@ -47,9 +51,10 @@ void CentralSystem::printfSystemInformation(bool mode) {
         printf("Camera PATH = %s\n", SIMULATION_DATA_PATH);
 
     if (use_lidar_) {
-        printf("LiDAR PATH  = %s\n", PORT);
-        printf("Boud Rate   = %d\n", BAUDRATE);
+        printf("LiDAR PATH  = %s\n", LIDAR_PORT);
+        printf("Boud Rate   = %d\n", LIDAR_BAUDRATE);
     }
+    printf("Arduino Path    = %s\n", UART_PORT);
     printf("System Status = %s\n", system_status_ ? "[ON]" : "[OFF]");
     printf("Auto System Start...\n");
     printf("=======================================================================\n\n");
@@ -131,16 +136,44 @@ void CentralSystem::scanLidarThread(std::shared_ptr<Lidar> lidar, std::shared_pt
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
+void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem> motor_control_system, std::shared_ptr<DogStatus> dog_status) {
+    char command;
+    bool status;
+    while(1) {
+        if (!dog_status->getSystemStatus()) {
+            break;
+        }
 
-void CentralSystem::controlMotorThread() {
+        command = 's'; // dog_status->getCollisionWarning();
+        switch (command) { // command line motor control
+            case 's':
+                status = motor_control_system->sendToCommand(command);
+                break;
+            case 'a':
+                break;
+            case 'd':
+                break;
 
- }
+            default:
+            case 'w':
+                break;
+        };
+
+        if (!status) {
+            continue;
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+}
 
 void CentralSystem::startProgram() {
     // camera_capture_thread_ = std::thread(&CentralSystem::cameraCaptureThread, camera_, dog_status_);
     compute_traj_thread_ = std::thread(&CentralSystem::computeTrajectoryThread, camera_, vo_, dog_status_);
     if(use_lidar_)
         scan_lidar_thread_ = std::thread(&CentralSystem::scanLidarThread, lidar_, dog_status_);
+
+    communication_system_thread_ = std::thread(&CentralSystem::communicationSystemThread, motor_control_system_, dog_status_);
 
     cv::Mat current_display;
     cv::Mat traj_display = cv::Mat::zeros(cv::Size(1000, 1000), CV_8UC3);
@@ -178,6 +211,7 @@ void CentralSystem::startProgram() {
     
     if(use_lidar_)
         scan_lidar_thread_.join();
-    
+
+    communication_system_thread_.join();
     printf("[SYSTEM]: Exit system!\n");
 }

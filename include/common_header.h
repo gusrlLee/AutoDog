@@ -6,6 +6,12 @@
 
 #include "config/config.h"
 
+#include <stdio.h>
+#include <unistd.h>       // Used for UART
+#include <sys/fcntl.h>    // Used for UART
+#include <termios.h>      // Used for UART
+#include <string>
+
 #include <iostream>
 #include <thread>
 #include <mutex>

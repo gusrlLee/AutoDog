@@ -9,6 +9,7 @@
 #include "config/config.h"
 #include "Lidar.h"
 #include "VisualOdometry.h"
+#include "MotorControlSystem.h"
 
 
 class CentralSystem {
@@ -31,7 +32,7 @@ class CentralSystem {
     std::shared_ptr<VisualOdometry> vo_;
 
     // for Legs 
-    // later ...
+    std::shared_ptr<MotorControlSystem> motor_control_system_;
     
     // for System 
     bool system_status_ = false;
@@ -41,14 +42,12 @@ class CentralSystem {
     // std::thread camera_capture_thread_;
     std::thread compute_traj_thread_;
     std::thread scan_lidar_thread_;
+    std::thread communication_system_thread_;
 
-
-    static void cameraCaptureThread(std::shared_ptr<Camera> camera, std::shared_ptr<DogStatus> dog_status);
+    //static void cameraCaptureThread(std::shared_ptr<Camera> camera, std::shared_ptr<DogStatus> dog_status);
     static void computeTrajectoryThread(std::shared_ptr<Camera> camera, std::shared_ptr<VisualOdometry> vo, std::shared_ptr<DogStatus> dog_status);
     static void scanLidarThread(std::shared_ptr<Lidar> lidar, std::shared_ptr<DogStatus> dog_status);
-
-    // later ....
-    static void controlMotorThread();    
+    static void communicationSystemThread(std::shared_ptr<MotorControlSystem> motor_control_system, std::shared_ptr<DogStatus> dog_status);    
 };
 
 #endif
