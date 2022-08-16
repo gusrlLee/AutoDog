@@ -101,7 +101,7 @@ void CentralSystem::computeTrajectoryThread(std::shared_ptr<Camera> camera, std:
         if (!dog_status->getSystemStatus()) {
             break;
         }
-
+        cap >> current_frame;
         // current_frame = dog_status->getCurrentFrame();
         if (current_frame.empty()) {
             continue;
