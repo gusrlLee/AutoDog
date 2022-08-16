@@ -2,9 +2,11 @@
 #define CONFIG_H
 
 // Your Camera Path
-#define CAMERA_PATH "/dev/video0"
+#define CAMERA_PATH "nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)1280, height=(int)720, framerate=(fraction)30/1 ! nvvidconv flip-method=0 ! video/x-raw, width=(int)1280, height=(int    )720, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink"
+#define REAL_FOCAL_LENGTH 1316.9918
+
 #define SIMULATION_DATA_PATH "../Data/07/image_0/%06d.png"
-#define FOCAL_LENGTH 707.0912
+#define SIMUL_FOCAL_LENGTH 707.0912
 
 // Your lidar port in dev 
 #define PORT "/dev/ttyUSB0"

@@ -4,12 +4,13 @@ using namespace rp::standalone::rplidar;
 CentralSystem::CentralSystem(bool mode, bool use_lidar) {
     // Camera init
     printf("[SYSTEM]: Initialization Camera....");
-    cv::Point2d center_point = cv::Point2d(601.8873, 183.1104);
     if ( mode ) { // Real Mode 
-        camera_ = std::make_shared<Camera>(CAMERA_PATH, FOCAL_LENGTH, center_point);
+        cv::Point2d center_point = cv::Point2d(639.5, 359.5);
+        camera_ = std::make_shared<Camera>(CAMERA_PATH, REAL_FOCAL_LENGTH, center_point);
     }
     else { // simulation mode 
-        camera_ = std::make_shared<Camera>(SIMULATION_DATA_PATH, FOCAL_LENGTH, center_point);
+        cv::Point2d center_point = cv::Point2d(601.8873, 183.1104);
+        camera_ = std::make_shared<Camera>(SIMULATION_DATA_PATH, SIMUL_FOCAL_LENGTH, center_point);
     }
     printf("\t[OK]\n");
 
@@ -30,8 +31,8 @@ CentralSystem::CentralSystem(bool mode, bool use_lidar) {
     printf("[SYSTEM]: Initialization Visual Odometry....");
     vo_ = std::make_shared<VisualOdometry>(camera_);
     printf("\t[OK]\n");
-    system_status_ = true;
 
+    system_status_ = true;
     this->printfSystemInformation(mode);
     dog_status_->setSystemStatus(true);
 }
@@ -49,53 +50,68 @@ void CentralSystem::printfSystemInformation(bool mode) {
         printf("LiDAR PATH  = %s\n", PORT);
         printf("Boud Rate   = %d\n", BAUDRATE);
     }
-    printf("System Status = %s\n", system_status_ ? "OK!" : "NO!");
+    printf("System Status = %s\n", system_status_ ? "[ON]" : "[OFF]");
     printf("Auto System Start...\n");
     printf("=======================================================================\n\n");
     printf("If you want exit system, Press ESC key\n");
 }
 
-void CentralSystem::cameraCaptureThread(std::shared_ptr<Camera> camera, std::shared_ptr<DogStatus> dog_status) {
-    cv::VideoCapture cap(camera->cameraPath());
+// void CentralSystem::cameraCaptureThread(std::shared_ptr<Camera> camera, std::shared_ptr<DogStatus> dog_status) {
+//     cv::VideoCapture cap(camera->cameraPath());
+//     if (!cap.isOpened()) {
+//         printf("[ERROR] Check Your Video or Camrea path!!!\n");
+//         return;
+//     }
+
+//     cv::Mat current_frame;
+//     while(1) {
+//         // read current_frame 
+//         cap >> current_frame;
+//         if (!dog_status->getSystemStatus()) {
+//             break;
+//         }
+
+//         if (current_frame.empty()) {
+//             continue;
+//         }
+
+//         dog_status->setCurrentFrame(current_frame);
+//         std::this_thread::sleep_for(std::chrono::milliseconds(30));
+//     }
+// }
+
+void CentralSystem::computeTrajectoryThread(std::shared_ptr<Camera> camera, std::shared_ptr<VisualOdometry> vo, std::shared_ptr<DogStatus> dog_status) {
+    cv::Mat current_frame;
+    // issue : if divide camera capture thread, not work visual odometry 
+    cv::VideoCapture cap;
+    if (camera->systemMode()) {
+        cap.open(camera->cameraPath(), cv::CAP_GSTREAMER);
+    }
+    else {
+        cap.open(camera->cameraPath());
+    }
+
     if (!cap.isOpened()) {
         printf("[ERROR] Check Your Video or Camrea path!!!\n");
         return;
     }
 
-    cv::Mat current_frame;
     while(1) {
         // read current_frame 
-        cap >> current_frame;
         if (!dog_status->getSystemStatus()) {
             break;
         }
 
+        // current_frame = dog_status->getCurrentFrame();
         if (current_frame.empty()) {
             continue;
         }
 
         dog_status->setCurrentFrame(current_frame);
-        std::this_thread::sleep_for(std::chrono::milliseconds(30));
-    }
-}
-
-void CentralSystem::computeTrajectoryThread(std::shared_ptr<Camera> camera, std::shared_ptr<VisualOdometry> vo, std::shared_ptr<DogStatus> dog_status) {
-    cv::Mat current_frame;
-
-    while(1) {
-        // read current_frame 
-        if (!dog_status->getSystemStatus()) {
-            break;
-        }
-
-        current_frame = dog_status->getCurrentFrame();
-        if (current_frame.empty()) {
-            continue;
-        }
-
         vo->addFrame(current_frame); 
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
+    cap.release();
 }
 
 void CentralSystem::scanLidarThread(std::shared_ptr<Lidar> lidar, std::shared_ptr<DogStatus> dog_status) {
@@ -106,7 +122,11 @@ void CentralSystem::scanLidarThread(std::shared_ptr<Lidar> lidar, std::shared_pt
 
         sl_lidar_response_measurement_node_hq_t nodes[8192];
         size_t count = _countof(nodes);
-        lidar->grabScanedLidarData(nodes, count);
+        count = lidar->grabScanedLidarData(nodes, count);
+        printf("====================================== LiDAR Data =============================================");
+        for (int pos = 0; pos < (int)count; ++pos) {
+            printf("[pos : %d] theta: %03.2f Dist: %08.2f\n", pos, (nodes[pos].angle_z_q14 * 90.f) / 16384.f, nodes[pos].dist_mm_q2 / 4.0f);
+        }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -117,7 +137,7 @@ void CentralSystem::controlMotorThread() {
  }
 
 void CentralSystem::startProgram() {
-    camera_capture_thread_ = std::thread(&CentralSystem::cameraCaptureThread, camera_, dog_status_);
+    // camera_capture_thread_ = std::thread(&CentralSystem::cameraCaptureThread, camera_, dog_status_);
     compute_traj_thread_ = std::thread(&CentralSystem::computeTrajectoryThread, camera_, vo_, dog_status_);
     if(use_lidar_)
         scan_lidar_thread_ = std::thread(&CentralSystem::scanLidarThread, lidar_, dog_status_);
@@ -153,7 +173,7 @@ void CentralSystem::startProgram() {
     cv::destroyAllWindows();
 
     
-    camera_capture_thread_.join();
+    // camera_capture_thread_.join();
     compute_traj_thread_.join();
     
     if(use_lidar_)

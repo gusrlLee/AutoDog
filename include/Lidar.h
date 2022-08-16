@@ -15,7 +15,7 @@ class Lidar {
   public:
     Lidar(std::string lidar_path, int baud_rate);
     ~Lidar();
-    void grabScanedLidarData(
+    size_t grabScanedLidarData(
         sl_lidar_response_measurement_node_hq_t* nodes,
         size_t counts);
     

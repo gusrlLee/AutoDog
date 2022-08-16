@@ -46,20 +46,20 @@ Lidar::~Lidar(){
 
 }
 
-void Lidar::grabScanedLidarData(
+size_t Lidar::grabScanedLidarData(
     sl_lidar_response_measurement_node_hq_t* nodes,
     size_t counts
 ) {
-    if (checkSLAMTECLIDARHealth(drv_)){
-        op_result_ = drv_->grabScanDataHq(nodes, counts);
-        if (SL_IS_OK(op_result_)) {
-            drv_->ascendScanData(nodes, counts);
-            for (int pos = 0; pos < (int)counts ; ++pos) {
-                printf("theta: %03.2f Dist: %08.2f\n", (nodes[pos].angle_z_q14 * 90.f) / 16384.f, nodes[pos].dist_mm_q2/4.0f);
-                double temp = nodes[pos].angle_z_q14*90.f/16384.f;
-            }
-        }
+    sl_lidar_response_measurement_node_hq_t nodes_buf[8192];
+    size_t result_counts = _countof(nodes);
+    op_result_ = drv_->grabScanDataHq(nodes, counts);
+
+    if (SL_IS_OK(op_result_)) {
+        drv_->ascendScanData(nodes, counts);
     }
+
+    size_t temp = counts;
+    return temp;
 }
 
 void Lidar::transformTheta(const float theta, double* output_array) {
@@ -96,7 +96,7 @@ bool Lidar::checkSLAMTECLIDARHealth(ILidarDriver * drv)
 
     op_result = drv->getHealth(healthinfo);
     if (SL_IS_OK(op_result)) { // the macro IS_OK is the preperred way to judge whether the operation is succeed.
-        printf("SLAMTEC Lidar health status : %d\n", healthinfo.status);
+        // printf("SLAMTEC Lidar health status : %d\n", healthinfo.status);
         if (healthinfo.status == SL_LIDAR_STATUS_ERROR) {
             fprintf(stderr, "[ERROR], slamtec lidar internal error detected. Please reboot the device to retry.\n");
             // enable the following code if you want slamtec lidar to be reboot by software

@@ -38,7 +38,7 @@ class CentralSystem {
     bool use_lidar_ = false;
 
     // thread 
-    std::thread camera_capture_thread_;
+    // std::thread camera_capture_thread_;
     std::thread compute_traj_thread_;
     std::thread scan_lidar_thread_;
 
