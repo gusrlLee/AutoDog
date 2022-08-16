@@ -6,6 +6,7 @@
 class MotorControlSystem {
   public:
     MotorControlSystem(const char* port_path, speed_t baud_rate);
+    ~MotorControlSystem() { close(fid_); };
     // TRANSMISSION
     bool sendToCommand(char command);
 

@@ -14,7 +14,8 @@ MotorControlSystem::MotorControlSystem(const char* port_path, speed_t baud_rate)
     
     // this here 
     if (fid_ == -1) {
-		printf("Error - Unable to open UART.  Ensure it is not in use by another application\n");
+		printf("\n[ERROR]: Unable to open UART.  Ensure it is not in use by another application\n");
+        exit(2);
 	}
 
     port_options_.c_cflag &= ~PARENB;                         // Disables the Parity Enable bit(PARENB),So No Parity
