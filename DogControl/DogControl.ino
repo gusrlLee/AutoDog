@@ -21,8 +21,10 @@ void loop() {
     if (incomingByte == 115) {
       if (initFlag == 0) {
         initServo();
+        delay(1000);
         initFlag = 1;
       }
+      sitUp();
     }
     
     if (incomingByte == 102) {
@@ -39,6 +41,7 @@ void loop() {
     
     if (incomingByte == 101) {
       turnOff();
+      initFlag = 0;
     }
   }
   delay(50);

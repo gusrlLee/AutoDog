@@ -39,4 +39,31 @@ void rightTurn() {
 
 void turnOff() {
   Serial.println("turn off");
+  sitDown();
+}
+
+void sitUp() {
+  if (sitFlag == 0) {
+    for (int i = 0; i < 130; i++) {
+      pwm.setPWM(10,0,hl_g--);
+      pwm.setPWM(14,0,hr_g++);
+      pwm.setPWM(2,0,fl_g--);
+      pwm.setPWM(6,0,fr_g++);
+      delay(10);
+    }
+    sitFlag = 1;
+  }
+}
+
+void sitDown() {
+  if (sitFlag == 1) {
+    for (int i = 0; i < 130; i++) {
+      pwm.setPWM(10,0,hl_g++);
+      pwm.setPWM(14,0,hr_g--);
+      pwm.setPWM(2,0,fl_g++);
+      pwm.setPWM(6,0,fr_g--);
+      delay(10);
+    }
+    sitFlag = 0;
+  }
 }

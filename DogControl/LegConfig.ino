@@ -3,31 +3,36 @@
 // Front Left up -> beta down, gamma up
 int fl_a = constrain(map(0, 0, 180, 150, 600), 150, 600);
 int fl_b = constrain(map(82, 0, 180, 150, 600), 150, 600);
-int fl_g = constrain(map(0, 0, 180, 150, 600), 150, 600);
+// int fl_g = constrain(map(0, 0, 180, 150, 600), 150, 600);
+int fl_g = 260;
 
 // Spread of leg -> alpha up
 // Front right up -> beta up, gamma down
 int fr_a = constrain(map(30, 0, 180, 150, 600), 150, 600);
 int fr_b = constrain(map(30, 0, 180, 150, 600), 150, 600);
-int fr_g = constrain(map(118, 0, 180, 150, 600), 150, 600);
+// int fr_g = constrain(map(118, 0, 180, 150, 600), 150, 600);
+int fr_g = 335;
 
 // Spread of leg -> alpha up
 // Hind Left up -> beta down, gamma up
 int hl_a = constrain(map(105, 0, 180, 150, 600), 150, 600);
 int hl_b = constrain(map(110, 0, 180, 150, 600), 150, 600);
-int hl_g = constrain(map(0, 0, 180, 150, 600), 150, 600);
+// int hl_g = constrain(map(0, 0, 180, 150, 600), 150, 600);
+int hl_g = 280;
 
 // Spread of leg -> alpha down
 // Hind right up -> beta up, gamma down
 int hr_a = constrain(map(135, 0, 180, 150, 600), 150, 600);
 int hr_b = constrain(map(20, 0, 180, 150, 600), 150, 600);
-int hr_g = constrain(map(105, 0, 180, 150, 600), 150, 600);
+// int hr_g = constrain(map(105, 0, 180, 150, 600), 150, 600);
+int hr_g = 282;
 
 // Flag
 int flFlag = 1;
 int hrFlag = 0;
 int frFlag = 0;
 int hlFlag = 0;
+int sitFlag = 0; // status: sitdown
 
 void  initServo(){
   pwm.setPWM(0,0,fl_a); 
@@ -42,7 +47,7 @@ void  initServo(){
   pwm.setPWM(5,0,fr_b);
   pwm.setPWM(2,0,fl_g); 
   pwm.setPWM(6,0,fr_g);
-
+  /*
   Serial.printf("fl_a = %d \n" , fl_a);
   Serial.printf("fl_b = %d \n" , fl_b);
   Serial.printf("fl_g = %d \n" , fl_g);
@@ -55,4 +60,5 @@ void  initServo(){
   Serial.printf("hr_a = %d \n" , hr_a);
   Serial.printf("hr_b = %d \n" , hr_b);
   Serial.printf("hr_g = %d \n" , hr_g);
+  */
 }
