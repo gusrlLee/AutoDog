@@ -24,6 +24,7 @@ class CentralSystem {
 
     // for LiDAR 
     std::shared_ptr<Lidar> lidar_; // lidar sensor 
+    void transformTheta(const float theta, double* output_array);
 
     // for DogStatus
     std::shared_ptr<DogStatus> dog_status_; // status save space 

@@ -40,9 +40,6 @@ MotorControlSystem::MotorControlSystem(const char* port_path, speed_t baud_rate)
     if (att != 0 ) {
         printf("\n[ERROR]: in Setting port attributes");
     }
-    else {
-        printf("\nPort Name = %s\n SUCCESS CONNECTING!\n");
-    }
 
     // Flush Buffers
     tcflush(fid_, TCIFLUSH);
@@ -58,6 +55,8 @@ bool MotorControlSystem::sendToCommand(char command) {
     
     unsigned char tx_buffer[2];
     unsigned char *p_tx_buffer;
+    p_tx_buffer = &tx_buffer[0];
+    
     *p_tx_buffer++ = command;
 
     int count = write(fid_, &tx_buffer, (p_tx_buffer - & tx_buffer[0]));
