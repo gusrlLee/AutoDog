@@ -1,51 +1,71 @@
+- MAIN
+  - CentralSystem Class
+    - Major Variable
+        - camera
+        - lidar
+        - vo
+        - dog_status
+        - motor_control_system
 
-- Central Processing System
-    - threads
-        - Camera Capture thread 
-            - DogStatus  
-            - camrea 
+    - Major Method
+        - startProgram()
+        - computeTrajectoryThread()
+        - scanLidarThread()
+        - communicationSystemThread()
 
-        - LiDAR scan data thread 
-            - DogStatus  
-            - LiDAR 
-
-        - Compute Visual odometry Trajectory
-            - visual odometry 
-            - DogStatus  
-
-        - Display Monitor Thread
-            - Display 
-            - DogStatus  
-            
-        - Motor Control Thread
-            - Legs 
-            - DogStatus  
-
-    - Camera
-        - Camera Pose
-        - Frame Processer 
+  - DogStatus Class
+    - variable
+        - current frame, previous frame data
+        - current trajectory data
+        - is working flag
+        - current LiDAR scan Data 
+         
+    - Major Method
+        - set/getcurrentFrame()
+        - set/getcurrentLidarData()
+        - set/getcurrentTrajectoryData()
+        - set/getSystemStatus()
     
-    - Visual Odometry
-        - K matrix (focal length, center_point) 
+  - Lidar Class
+    - variable
+        - channel
+        - driver
 
-    - LiDAR
-        - Driver 
-        - LiDAR Scan Data 
-        - rotaion $\theta$
+    - Major Method
+      - checkSLAMTECLIDARHealth()
+      - transformTheta()
+      - grabSacnedLidarData()
 
-    - Legs
-        - moters of arduino control
-        - Serial comunicate between Jetson Nano and Arduino
+  - MotorControlSystem Class
+    - variable
+        - file descriptor to Serial Communication.
+        - port options
+  
+    - Major Method
+      - sendToCommand()
 
-    - DogStatus  
-        - All of Main System information 
-        - Current Frame
-        - Current Trajectory
-        - Current Lidar Scan Data 
-        - Current status
-        - all of previous information 
+  - VisualOdometry Class
+    - variable
+        - current keypoints, previous keypoints
+        - K (intrinsic Matrix)
 
-    - Display
-      - GUI 
-      - input control
-      - 2 Viewer (current frame, Trajectory frame)
+    - Major Method
+        - addFrame*()
+        - extractKeyPoints()
+        - computeDescritpors()
+        - poseEstimationPnP()
+        - getCurrentLocation()
+
+  - Camera Class
+    - variable
+        - focal length
+        - principer point
+        - system mode
+        - camera path
+
+    - Major Method
+        - cameraPath()
+        - focalLength()
+        - principalPoints()
+        - systemMode()
+    
