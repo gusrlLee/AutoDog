@@ -14,8 +14,8 @@
 #define LIDAR_PORT "/dev/ttyUSB0"
 #define SCALE 0.5
 // screen size 
-#define SCREENX 800
-#define SCREENY 500
+#define SCREENX 1000
+#define SCREENY 1000
 // start location 
 #define STARTX 100
 #define STARTY 100
@@ -25,6 +25,7 @@
 #define PI 3.14
 // transform ratio
 #define PIXEL_RATIO 0.01
+#define OUR_LIDAR_MAX_DISTANCE 2000
 
 #define _countof( _Array ) (int)(sizeof(_Array) / sizeof(_Array[0]))
 

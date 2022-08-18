@@ -146,31 +146,90 @@ void CentralSystem::scanLidarThread(std::shared_ptr<Lidar> lidar, std::shared_pt
 void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem> motor_control_system, std::shared_ptr<DogStatus> dog_status) {
     char command;
     bool status;
+    bool is_in_dangerzone = false;
+    bool is_safe_left = true;
+    bool is_safe_right = true;
+    unsigned int object_collision_distance_threshold = 1000;
+
     while(1) {
         if (!dog_status->getSystemStatus()) {
             break;
         }
 
-        command = 's'; // dog_status->getCollisionWarning();
-        switch (command) { // command line motor control
-            case 's':
-                status = motor_control_system->sendToCommand(command);
-                break;
-            case 'l':
-                break;
-            case 'r':
-                break;
+        std::vector<sl_lidar_response_measurement_node_hq_t> current_scan_data = dog_status->getScanData();
+        
+        // for right 
+        for (int i=0; i<current_scan_data.size(); i++) {
+            float theta = current_scan_data[i].angle_z_q14 * 90.f / 16384.f; 
+            if ( theta > 90) 
+                break; // For 0 < theta < 90 
 
-            default:
-            case 'w':
-                break;
-        };
+            float object_distance = current_scan_data[i].dist_mm_q2 / 4.0f;
+            if ( theta < 45 ) { // danger zone 
+                if (object_distance < object_collision_distance_threshold) {
+                    is_in_dangerzone = true;
+                }
+            }
+            else { // theta > 45 
+                if (object_distance < object_collision_distance_threshold) {
+                    is_safe_right = false;
+                }
+            }
+        }
+
+        // for left
+        for (int i=current_scan_data.size() - 1; i >= 0; i--) {
+            float theta = current_scan_data[i].angle_z_q14 * 90.f / 16384.f; 
+            if ( theta < 270) 
+                break; // For 270 < theta < 360 
+
+            float object_distance = current_scan_data[i].dist_mm_q2 / 4.0f;
+            if ( theta > 315 ) { // danger zone 
+                if (object_distance < object_collision_distance_threshold) {
+                    is_in_dangerzone = true;
+                }
+            }
+            else { // theta < 315  
+                if (object_distance < object_collision_distance_threshold) {
+                    is_safe_left = false;
+                }
+            }
+        }
+
+        if ( is_in_dangerzone ) {
+            if ( is_safe_right == true && is_safe_left == false ) { // safe right 
+                command = 'r';
+            }
+            else if ( is_safe_left == true && is_safe_right == false ) { // safe left 
+                command = 'l';
+            }
+            else if ( is_safe_right == false && is_safe_left == false ) {
+                // if dog can't turn left and turn right, dog need to turn arround
+                // So Continue giving 's' to command, due to turn arround.
+                command = 'r';
+            }
+            else if ( is_safe_right == true && is_safe_left == true ) {
+                // if both is_safe_right and is_safe_left is true, we choice right turn.
+                command = 'r';
+            }
+        } 
+        else {
+            // If there is nothing in the danger zone, we give 'w' for going forward
+            command = 'w';
+        }
+        
+        // send command to Arduino. 
+        status = motor_control_system->sendToCommand(command);
+
+        // init flag
+        is_in_dangerzone = false;
+        is_safe_left = true;
+        is_safe_right = true;
 
         if (!status) {
             continue;
         }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
@@ -210,18 +269,22 @@ void CentralSystem::startProgram() {
             // printf("theta: %03.2f Dist: %08.2f\n", (curr[pos].angle_z_q14 * 90.f) / 16384.f, nodes[pos].dist_mm_q2 / 4.0f);
             temp = current_scan_data[pos].angle_z_q14 * 90.f / 16384.f;
             transformTheta(temp, theta_array);
+            float object_distance = current_scan_data[pos].dist_mm_q2 / 4.0f;
 
-            if ( current_scan_data[pos].dist_mm_q2 > 0) {
-                int x = int((current_scan_data[pos].dist_mm_q2 / 4.0f) * theta_array[0] * PIXEL_RATIO);
-                int y = int((current_scan_data[pos].dist_mm_q2 / 4.0f) * theta_array[1] * PIXEL_RATIO);
-
-                if ( abs(x) < 500 && abs(y) < 500) {
+            if ( object_distance > 0) {
+                if ((object_distance) < OUR_LIDAR_MAX_DISTANCE) {
+                    int x = int((object_distance) * theta_array[0] * PIXEL_RATIO);
+                    int y = int((object_distance) * theta_array[1] * PIXEL_RATIO);
                     cv::line(traj_display, cv::Point(curr_loc_x, curr_loc_y), cv::Point(curr_loc_x + x, curr_loc_y + y), cv::Scalar(100, 100, 100), 1, cv::LINE_AA);
                     cv::circle(traj_display, cv::Point(curr_loc_x + x, curr_loc_y + y), 1, cv::Scalar(0, 0, 255), -1, cv::FILLED);
                 }
+                else { // if (current_scan_data[pos].dist_mm_q2 / 4.0f > 2000)
+                    int x = int((OUR_LIDAR_MAX_DISTANCE) * theta_array[0] * PIXEL_RATIO);
+                    int y = int((OUR_LIDAR_MAX_DISTANCE) * theta_array[1] * PIXEL_RATIO);
+                    cv::line(traj_display, cv::Point(curr_loc_x, curr_loc_y), cv::Point(curr_loc_x + x, curr_loc_y + y), cv::Scalar(100, 100, 100), 1, cv::LINE_AA);
+                }
             }
         }
-
 
         if (current_display.empty()) 
             continue;
