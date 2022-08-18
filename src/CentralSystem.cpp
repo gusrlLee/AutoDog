@@ -198,24 +198,24 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
 
         if ( is_in_dangerzone ) {
             if ( is_safe_right == true && is_safe_left == false ) { // safe right 
-                command = 'r';
+                command = TRUN_RIGHT;
             }
             else if ( is_safe_left == true && is_safe_right == false ) { // safe left 
-                command = 'l';
+                command = TURN_LEFT;
             }
             else if ( is_safe_right == false && is_safe_left == false ) {
                 // if dog can't turn left and turn right, dog need to turn arround
                 // So Continue giving 's' to command, due to turn arround.
-                command = 'r';
+                command = TRUN_RIGHT;
             }
             else if ( is_safe_right == true && is_safe_left == true ) {
                 // if both is_safe_right and is_safe_left is true, we choice right turn.
-                command = 'r';
+                command = TRUN_RIGHT;
             }
         } 
         else {
             // If there is nothing in the danger zone, we give 'w' for going forward
-            command = 'w';
+            command = GO_FORWARD;
         }
         
         // send command to Arduino. 

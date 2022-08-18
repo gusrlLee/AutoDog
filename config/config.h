@@ -35,4 +35,10 @@
 #define VMINX 1 
 #define NSERIAL_CHAR 256
 
+#define INIT 's'
+#define STOP 'x'
+#define GO_FORWARD 'w'
+#define TURN_LEFT 'l'
+#define TRUN_RIGHT 'r'
+
 #endif // CONFIG_H
