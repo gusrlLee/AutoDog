@@ -38,7 +38,7 @@ MotorControlSystem::MotorControlSystem(const char* port_path, speed_t baud_rate)
 
     int att = tcsetattr(fid_, TCSANOW, &port_options_);
     if (att != 0 ) {
-        printf("\n[ERROR]: in Setting port attributes");
+        printf("\n[ERROR]: in Setting port attributes\n");
     }
 
     // Flush Buffers
@@ -47,6 +47,12 @@ MotorControlSystem::MotorControlSystem(const char* port_path, speed_t baud_rate)
 
     // 0.5 sec delay
     usleep(500000); 
+
+    bool init_flag = sendToCommand(START_FLAG);
+    if (init_flag == false) {
+        printf("\n[ERROR]: CANNOT init our dogs, Try Again!\n");
+        exit(1);
+    }
 }
 
 bool MotorControlSystem::sendToCommand(char command) {

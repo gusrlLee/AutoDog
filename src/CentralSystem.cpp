@@ -153,6 +153,7 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
 
     while(1) {
         if (!dog_status->getSystemStatus()) {
+            motor_control_system->sendToCommand(STOP_FLAG);
             break;
         }
 
