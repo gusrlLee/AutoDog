@@ -117,7 +117,7 @@ void CentralSystem::computeTrajectoryThread(std::shared_ptr<Camera> camera, std:
 
         dog_status->setCurrentFrame(current_frame);
         vo->addFrame(current_frame); 
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));
     }
     cap.release();
 }
@@ -134,12 +134,12 @@ void CentralSystem::scanLidarThread(std::shared_ptr<Lidar> lidar, std::shared_pt
         std::vector<sl_lidar_response_measurement_node_hq_t> current_scan_data(std::begin(nodes), std::end(nodes));
         dog_status->setScanData(current_scan_data, count);
         // for degug
-        printf("====================================== LiDAR Data =============================================");
-        for (int pos = 0; pos < (int)count; ++pos) {
-            printf("[pos : %d] theta: %03.2f Dist: %08.2f\n", pos, (nodes[pos].angle_z_q14 * 90.f) / 16384.f, nodes[pos].dist_mm_q2 / 4.0f);
-        }
+        // printf("====================================== LiDAR Data =============================================");
+        // for (int pos = 0; pos < (int)count; ++pos) {
+        //     printf("[pos : %d] theta: %03.2f Dist: %08.2f\n", pos, (nodes[pos].angle_z_q14 * 90.f) / 16384.f, nodes[pos].dist_mm_q2 / 4.0f);
+        // }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
@@ -149,11 +149,12 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
     bool is_in_dangerzone = false;
     bool is_safe_left = true;
     bool is_safe_right = true;
-    unsigned int object_collision_distance_threshold = 1000;
+    unsigned int object_collision_distance_threshold = 200;
+    motor_control_system->sendToCommand(UP_FLAG);
 
     while(1) {
         if (!dog_status->getSystemStatus()) {
-            motor_control_system->sendToCommand(STOP_FLAG);
+            motor_control_system->sendToCommand(END_FLAG);
             break;
         }
 
@@ -219,7 +220,9 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
             command = GO_FORWARD;
         }
         
+        command = GO_FORWARD;
         // send command to Arduino. 
+        printf("[Debug] Command : %c\n", command);
         status = motor_control_system->sendToCommand(command);
 
         // init flag
@@ -230,7 +233,7 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
         if (!status) {
             continue;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     }
 }
 

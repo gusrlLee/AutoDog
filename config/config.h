@@ -24,7 +24,7 @@
 // PI 
 #define PI 3.14
 // transform ratio
-#define PIXEL_RATIO 0.01
+#define PIXEL_RATIO 0.02
 #define OUR_LIDAR_MAX_DISTANCE 2000
 
 #define _countof( _Array ) (int)(sizeof(_Array) / sizeof(_Array[0]))
@@ -36,9 +36,10 @@
 #define NSERIAL_CHAR 256
 
 #define START_FLAG 's'
-#define STOP_FLAG 'x'
-#define GO_FORWARD 'w'
-#define TURN_LEFT 'l'
+#define UP_FLAG 'u'
+#define GO_FORWARD 'f'
 #define TRUN_RIGHT 'r'
+#define TURN_LEFT 'l'
+#define END_FLAG 'e'
 
 #endif // CONFIG_H
