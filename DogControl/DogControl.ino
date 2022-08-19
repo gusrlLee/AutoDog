@@ -17,29 +17,33 @@ void loop() {
   if (Serial.available() > 0) {
     incomingByte = Serial.read();
     Serial.println(incomingByte, DEC);
-
-    if (incomingByte == 115) {
+    
+    if (incomingByte == 115) {  // input = 's'
       if (initFlag == 0) {
         initServo();
         delay(1000);
         initFlag = 1;
-      }
+      }e
+      
+    }
+    
+    if (incomingByte == 117) {  // input = 'u'
       sitUp();
     }
     
-    if (incomingByte == 102) {
+    if (incomingByte == 102) {  // input = 'f'
       forward();
     }
     
-    if (incomingByte == 108) {
+    if (incomingByte == 108) {  // input = 'l'
       leftTurn();
     }
     
-    if (incomingByte == 114) {
+    if (incomingByte == 114) {  // input = 'r'
       rightTurn();
     }
     
-    if (incomingByte == 101) {
+    if (incomingByte == 101) {  // input = 'e'
       turnOff();
       initFlag = 0;
     }
