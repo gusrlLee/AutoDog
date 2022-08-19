@@ -1,20 +1,13 @@
 #ifndef VISUAL_ODOMETRY_H
 #define VISUAL_ODOMETRY_H
 
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <string>
-#include <math.h>
-
-#include <opencv2/opencv.hpp>
-#include <opencv2/features2d.hpp>
+#include "common_header.h"
+#include "Camera.h"
 
 class VisualOdometry 
 {
     public:
-        VisualOdometry();
-        ~VisualOdometry();
+        VisualOdometry(std::shared_ptr<Camera> camera);
 
         void addFrame(cv::Mat frame);
         cv::Point2d getCurrentLocation();
@@ -34,7 +27,7 @@ class VisualOdometry
         bool is_ready = false;
 
         // temp calibration data 
-        double focal_length = 707.0912;
+        double focal_length;
         cv::Point2d principal_point;
 
         cv::Mat display = cv::Mat::zeros(1000, 1000, CV_8UC3);

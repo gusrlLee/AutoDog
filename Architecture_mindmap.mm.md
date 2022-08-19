@@ -1,51 +1,71 @@
+- MAIN
+  - CentralSystem Class
+    - Major Variable
+        - camera
+        - lidar
+        - vo
+        - dog_status
+        - motor_control_system
 
-- Central Processing System
-    - threads
-        - Camera Capture thread 
-            - DogStatus  
-            - camrea 
-            - visual odometry
+    - Major Method
+        - startProgram()
+        - computeTrajectoryThread()
+        - scanLidarThread()
+        - communicationSystemThread()
 
-        - LiDAR scan data thread 
-            - DogStatus  
-            - LiDAR 
+  - DogStatus Class
+    - variable
+        - current frame, previous frame data
+        - current trajectory data
+        - is working flag
+        - current LiDAR scan Data 
+         
+    - Major Method
+        - set/getcurrentFrame()
+        - set/getcurrentLidarData()
+        - set/getcurrentTrajectoryData()
+        - set/getSystemStatus()
+    
+  - Lidar Class
+    - variable
+        - channel
+        - driver
 
-        - Compute Visual odometry Trajectory
-            - visual odometry 
-            - DogStatus  
+    - Major Method
+      - checkSLAMTECLIDARHealth()
+      - transformTheta()
+      - grabSacnedLidarData()
 
-        - Display Monitor Thread
-            - Display 
-            - DogStatus  
-            
-        - Motor Control Thread
-            - Legs 
-            - DogStatus  
+  - MotorControlSystem Class
+    - variable
+        - file descriptor to Serial Communication.
+        - port options
+  
+    - Major Method
+      - sendToCommand()
 
-    - Camera
-        - Camera Pose
-        - Frame Processer 
-        - K matrix (focal length, center_point) 
+  - VisualOdometry Class
+    - variable
+        - current keypoints, previous keypoints
+        - K (intrinsic Matrix)
 
-    - LiDAR
-        - Driver 
-        - LiDAR Scan Data 
-        - rotaion $\theta$
+    - Major Method
+        - addFrame*()
+        - extractKeyPoints()
+        - computeDescritpors()
+        - poseEstimationPnP()
+        - getCurrentLocation()
 
-    - Legs
-        - moters of arduino control
-        - Serial comunicate between Jetson Nano and Arduino
-        -  
+  - Camera Class
+    - variable
+        - focal length
+        - principer point
+        - system mode
+        - camera path
 
-    - DogStatus  
-        - All of Main System information 
-        - Current Frame
-        - Current Trajectory
-        - Current Lidar Scan Data 
-        - Current status
-        - all of previous information 
-
-    - Display
-      - GUI 
-      - input control
-      - 2 Viewer (current frame, Trajectory frame)
+    - Major Method
+        - cameraPath()
+        - focalLength()
+        - principalPoints()
+        - systemMode()
+    

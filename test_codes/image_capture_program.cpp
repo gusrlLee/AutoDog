@@ -17,8 +17,8 @@ int main()
 {
     int capture_width = 1280 ;
     int capture_height = 720 ;
-    int display_width = 1280 ;
-    int display_height = 720 ;
+    int display_width = 1226 ;
+    int display_height = 370 ;
     int framerate = 30 ;
     int flip_method = 0 ;
 
@@ -53,7 +53,7 @@ int main()
             break;
         }
         if (key == 115) {
-            sprintf(buf, "../checkimage_dataset/%05d.png", counter);
+            sprintf(buf, "../dataset/%05d.png", counter);
             cv::imwrite(buf, frame);
             std::cout << "save image path = " << buf << std::endl;
             counter++;
