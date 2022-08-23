@@ -149,7 +149,7 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
     bool is_in_dangerzone = false;
     bool is_safe_left = true;
     bool is_safe_right = true;
-    unsigned int object_collision_distance_threshold = 200;
+    float object_collision_distance_threshold = 600;
     motor_control_system->sendToCommand(UP_FLAG);
 
     while(1) {
@@ -160,40 +160,40 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
 
         std::vector<sl_lidar_response_measurement_node_hq_t> current_scan_data = dog_status->getScanData();
         
-        // for right 
+        // our LIDAR 
+        //         0
+        //        ****   
+        // 270   ******    90
+        //        ****   
+        //         \/    
+        //        180
+
+
         for (int i=0; i<current_scan_data.size(); i++) {
             float theta = current_scan_data[i].angle_z_q14 * 90.f / 16384.f; 
-            if ( theta > 90) 
-                break; // For 0 < theta < 90 
+            // we consider theta between 90 < theta < 270,
+            // so other theta break
+            if ( theta < 90 ) continue;
+            if ( theta > 270 ) break;
 
+            // calc distance 
             float object_distance = current_scan_data[i].dist_mm_q2 / 4.0f;
-            if ( theta < 45 ) { // danger zone 
-                if (object_distance < object_collision_distance_threshold) {
+            printf("[Debug] theta = %f : object_distance = %f\n", theta ,object_distance);
+            if ( theta < 225 && theta > 135) { // check colision warning 
+                if ( object_distance !=0 && object_distance < object_collision_distance_threshold ) {
                     is_in_dangerzone = true;
                 }
             }
-            else { // theta > 45 
-                if (object_distance < object_collision_distance_threshold) {
-                    is_safe_right = false;
-                }
-            }
-        }
 
-        // for left
-        for (int i=current_scan_data.size() - 1; i >= 0; i--) {
-            float theta = current_scan_data[i].angle_z_q14 * 90.f / 16384.f; 
-            if ( theta < 270) 
-                break; // For 270 < theta < 360 
-
-            float object_distance = current_scan_data[i].dist_mm_q2 / 4.0f;
-            if ( theta > 315 ) { // danger zone 
-                if (object_distance < object_collision_distance_threshold) {
-                    is_in_dangerzone = true;
-                }
-            }
-            else { // theta < 315  
-                if (object_distance < object_collision_distance_threshold) {
+            if ( theta < 135 ) { // check left safe zone 
+                if ( object_distance !=0 && object_distance < object_collision_distance_threshold ) {
                     is_safe_left = false;
+                }
+            }
+
+            if ( theta > 225 ) { // check right safe zone 
+                if ( object_distance !=0 && object_distance < object_collision_distance_threshold ) {
+                    is_safe_right = false;
                 }
             }
         }
@@ -219,9 +219,11 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
             // If there is nothing in the danger zone, we give 'w' for going forward
             command = GO_FORWARD;
         }
-        
-        command = GO_FORWARD;
+
         // send command to Arduino. 
+        printf("[Debug] Is in Dangerzone : %s\n", is_in_dangerzone ? "Yes!" : "No!");
+        printf("[Debug] Safe Left : %s\n", is_safe_left ? "Yes!" : "No!");
+        printf("[Debug] Safe Right : %s\n", is_safe_right ? "Yes!" : "No!");
         printf("[Debug] Command : %c\n", command);
         status = motor_control_system->sendToCommand(command);
 
