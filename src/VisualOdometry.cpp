@@ -101,6 +101,7 @@ void VisualOdometry::poseEstimationPnP() {
         T.col(3).rowRange(0, 3) = t * 1.0;
         camera_pose = camera_pose * T.inv();
     }
+    std::cout << "camera_pose = " << camera_pose << std::endl;
     this->current_location = cv::Point2d((int)camera_pose.at<double>(0, 3), (int)camera_pose.at<double>(2, 3));
 
     // cv::Point2d camera_point((int)camera_pose.at<double>(0, 3), (int)camera_pose.at<double>(2, 3));

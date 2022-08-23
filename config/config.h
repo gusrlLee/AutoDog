@@ -6,8 +6,8 @@
 
 #define REAL_FOCAL_LENGTH 1316.9918
 
-// #define SIMULATION_DATA_PATH "../Data/07/image_0/%06d.png"
-#define SIMULATION_DATA_PATH "../Data/dataset/%05d.png"
+#define SIMULATION_DATA_PATH "../Data/07/image_0/%06d.png"
+// #define SIMULATION_DATA_PATH "../Data/dataset/%05d.png"
 // #define SIMULATION_DATA_PATH "../Data/turn_dataset1/%05d.png"
 #define SIMUL_FOCAL_LENGTH 707.0912
 

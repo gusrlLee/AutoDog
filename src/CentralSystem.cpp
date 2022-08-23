@@ -178,7 +178,8 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
 
             // calc distance 
             float object_distance = current_scan_data[i].dist_mm_q2 / 4.0f;
-            printf("[Debug] theta = %f : object_distance = %f\n", theta ,object_distance);
+            // for debug
+            // printf("[Debug] theta = %f : object_distance = %f\n", theta ,object_distance);
             if ( theta < 225 && theta > 135) { // check colision warning 
                 if ( object_distance !=0 && object_distance < object_collision_distance_threshold ) {
                     is_in_dangerzone = true;
@@ -221,10 +222,10 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
         }
 
         // send command to Arduino. 
-        printf("[Debug] Is in Dangerzone : %s\n", is_in_dangerzone ? "Yes!" : "No!");
-        printf("[Debug] Safe Left : %s\n", is_safe_left ? "Yes!" : "No!");
-        printf("[Debug] Safe Right : %s\n", is_safe_right ? "Yes!" : "No!");
-        printf("[Debug] Command : %c\n", command);
+        // printf("[Debug] Is in Dangerzone : %s\n", is_in_dangerzone ? "Yes!" : "No!");
+        // printf("[Debug] Safe Left : %s\n", is_safe_left ? "Yes!" : "No!");
+        // printf("[Debug] Safe Right : %s\n", is_safe_right ? "Yes!" : "No!");
+        // printf("[Debug] Command : %c\n", command);
         status = motor_control_system->sendToCommand(command);
 
         // init flag
@@ -261,7 +262,7 @@ void CentralSystem::startProgram() {
 
         cv::Point2d current_location = vo_->getCurrentLocation();
         int curr_loc_x = (2*int(current_location.x)) + 500;
-        int curr_loc_y = (2*int(current_location.y)) + 500;
+        int curr_loc_y = 500 - (2*int(current_location.y));
         // printf("x : %d y: %d\n", curr_loc_x, curr_loc_y);
 
         cv::drawMarker(traj_display, cv::Point(curr_loc_x, curr_loc_y), cv::Scalar(0, 0, 255), cv::MARKER_SQUARE, 5, 2);
