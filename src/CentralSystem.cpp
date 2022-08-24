@@ -161,6 +161,12 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
         std::vector<sl_lidar_response_measurement_node_hq_t> current_scan_data = dog_status->getScanData();
         
         // our LIDAR 
+        //
+        //  ----------------
+        // |                |
+        // |    OUR ZONE    |
+        // |                |
+        //  ----------------
         //         0
         //        ****   
         // 270   ******    90
@@ -168,33 +174,38 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
         //         \/    
         //        180
 
-
         for (int i=0; i<current_scan_data.size(); i++) {
             float theta = current_scan_data[i].angle_z_q14 * 90.f / 16384.f; 
-            // we consider theta between 90 < theta < 270,
+            // we consider 90 > theta,
             // so other theta break
-            if ( theta < 90 ) continue;
-            if ( theta > 270 ) break;
-
-            // calc distance 
+            if ( theta > 90) break;
             float object_distance = current_scan_data[i].dist_mm_q2 / 4.0f;
-            // for debug
-            // printf("[Debug] theta = %f : object_distance = %f\n", theta ,object_distance);
-            if ( theta < 225 && theta > 135) { // check colision warning 
-                if ( object_distance !=0 && object_distance < object_collision_distance_threshold ) {
+            if (theta < 45) { // check colision warning
+                if (object_distance != 0 && object_distance < object_collision_distance_threshold) {
                     is_in_dangerzone = true;
                 }
             }
-
-            if ( theta < 135 ) { // check left safe zone 
-                if ( object_distance !=0 && object_distance < object_collision_distance_threshold ) {
-                    is_safe_left = false;
+            else { // check right 
+                if (object_distance != 0 && object_distance < object_collision_distance_threshold) {
+                    is_safe_right = false;
                 }
             }
+        }
 
-            if ( theta > 225 ) { // check right safe zone 
-                if ( object_distance !=0 && object_distance < object_collision_distance_threshold ) {
-                    is_safe_right = false;
+        for (int i=current_scan_data.size() - 1; i>=0; i--) {
+            float theta = current_scan_data[i].angle_z_q14 * 90.f / 16384.f; 
+            // we consider 270 < theta,
+            // so other theta break
+            if ( theta < 270) break;
+            float object_distance = current_scan_data[i].dist_mm_q2 / 4.0f;
+            if (theta > 315) { // check colision warning
+                if (object_distance != 0 && object_distance < object_collision_distance_threshold) {
+                    is_in_dangerzone = true;
+                }
+            }
+            else { // check left
+                if (object_distance != 0 && object_distance < object_collision_distance_threshold) {
+                    is_safe_left = false;
                 }
             }
         }
