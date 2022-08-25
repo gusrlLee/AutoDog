@@ -5,7 +5,7 @@ CentralSystem::CentralSystem(bool mode, bool use_lidar) {
     // Camera init
     printf("[SYSTEM]: Initialization Camera....");
     if ( mode ) { // Real Mode 
-        cv::Point2d center_point = cv::Point2d(639.5, 359.5);
+        cv::Point2d center_point = cv::Point2d(601.8873, 183.1104);
         camera_ = std::make_shared<Camera>(CAMERA_PATH, REAL_FOCAL_LENGTH, center_point, mode);
     }
     else { // simulation mode 
@@ -87,11 +87,10 @@ void CentralSystem::printfSystemInformation(bool mode) {
 
 void CentralSystem::computeTrajectoryThread(std::shared_ptr<Camera> camera, std::shared_ptr<VisualOdometry> vo, std::shared_ptr<DogStatus> dog_status) {
     cv::Mat current_frame;
-    // issue : if divide camera capture thread, not work visual odometry 
     cv::VideoCapture cap;
+    // issue : if divide camera capture thread, not work visual odometry 
     if (camera->systemMode()) {
         cap.open(camera->cameraPath(), cv::CAP_GSTREAMER);
-        // cap.open("/dev/video1");
     }
     else {
         cap.open(camera->cameraPath());
@@ -99,16 +98,15 @@ void CentralSystem::computeTrajectoryThread(std::shared_ptr<Camera> camera, std:
 
     if (!cap.isOpened()) {
         printf("[ERROR] Check Your Video or Camrea path!!!\n");
-        return;
+        exit(1);
     }
 
     while(1) {
         // read current_frame 
         if (!dog_status->getSystemStatus()) {
-            cap.release();
+            printf("[SYSTEM] Close Your Camera!\n");
             break;
         }
-
         cap >> current_frame;
         // current_frame = dog_status->getCurrentFrame();
         if (current_frame.empty()) {
@@ -119,7 +117,6 @@ void CentralSystem::computeTrajectoryThread(std::shared_ptr<Camera> camera, std:
         vo->addFrame(current_frame); 
         std::this_thread::sleep_for(std::chrono::milliseconds(30));
     }
-    cap.release();
 }
 
 void CentralSystem::scanLidarThread(std::shared_ptr<Lidar> lidar, std::shared_ptr<DogStatus> dog_status) {
@@ -236,7 +233,7 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
         // printf("[Debug] Is in Dangerzone : %s\n", is_in_dangerzone ? "Yes!" : "No!");
         // printf("[Debug] Safe Left : %s\n", is_safe_left ? "Yes!" : "No!");
         // printf("[Debug] Safe Right : %s\n", is_safe_right ? "Yes!" : "No!");
-        // printf("[Debug] Command : %c\n", command);
+        printf("[Debug] Command : %c\n", command);
         status = motor_control_system->sendToCommand(command);
 
         // init flag
@@ -270,7 +267,6 @@ void CentralSystem::startProgram() {
         }
 
         current_display = dog_status_->getCurrentFrame();
-
         cv::Point2d current_location = vo_->getCurrentLocation();
         int curr_loc_x = (2*int(current_location.x)) + 500;
         int curr_loc_y = 500 - (2*int(current_location.y));
@@ -306,7 +302,7 @@ void CentralSystem::startProgram() {
 
         if (current_display.empty()) 
             continue;
-
+        
         cv::imshow("display", current_display);
         cv::imshow("Tracjectory", traj_display);
         int key = cv::waitKey(27);
@@ -315,16 +311,15 @@ void CentralSystem::startProgram() {
             break;
         }
     }
-    cv::destroyAllWindows();
-
     
     // camera_capture_thread_.join();
-    compute_traj_thread_.join();
-    
-    if(use_lidar_)
-        scan_lidar_thread_.join();
 
     communication_system_thread_.join();
+    if(use_lidar_)
+        scan_lidar_thread_.join();
+    compute_traj_thread_.join();
+
+    cv::destroyAllWindows();
     printf("[SYSTEM]: Exit system!\n");
 }
 

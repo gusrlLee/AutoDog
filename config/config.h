@@ -12,7 +12,7 @@
 #define SIMUL_FOCAL_LENGTH 707.0912
 
 // Your lidar port in dev 
-#define LIDAR_PORT "/dev/ttyUSB1"
+#define LIDAR_PORT "/dev/ttyUSB0"
 #define SCALE 0.5
 // screen size 
 #define SCREENX 1000
@@ -31,7 +31,7 @@
 #define _countof( _Array ) (int)(sizeof(_Array) / sizeof(_Array[0]))
 
 // UART PORT /dev/ttyUSB1
-#define UART_PORT "/dev/ttyUSB0"
+#define UART_PORT "/dev/ttyUSB1"
 #define UART_BAUDRATE B115200
 #define VMINX 1 
 #define NSERIAL_CHAR 256
