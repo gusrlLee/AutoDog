@@ -29,6 +29,11 @@ cv::Mat DogStatus::getCurrentFrame() {
     return curr_frame_.clone();
 }
 
+cv::Mat DogStatus::getCurrentFrame(int a) {
+    std::lock_guard<std::mutex> lock(current_frame_mutex_);
+    return curr_frame_.clone();
+}
+
 /**
  * @brief set current frame in dog status. 
  * @param current_frame : current_frame received from camera or video.
@@ -36,6 +41,21 @@ cv::Mat DogStatus::getCurrentFrame() {
 void DogStatus::setCurrentFrame(cv::Mat current_frame) {    
     std::lock_guard<std::mutex> lock(current_frame_mutex_);
     curr_frame_ = current_frame;
+}
+
+void DogStatus::pushFrameBuffer(cv::Mat current_frame) {
+    std::lock_guard<std::mutex> lock(frame_buffer_mutex_);
+    frame_buffer_.push(current_frame);
+}
+
+cv::Mat DogStatus::popFrameBuffer() {
+    std::lock_guard<std::mutex> lock(frame_buffer_mutex_);
+    cv::Mat current_frame;
+    if (!frame_buffer_.empty()) {
+        current_frame = frame_buffer_.front();
+        frame_buffer_.pop();
+    }
+    return current_frame;
 }
 
 /**
@@ -67,6 +87,17 @@ void DogStatus::setSystemStatus(bool status) {
 void DogStatus::setTrajData(std::vector<cv::Point2f> current_traj_data) { 
     std::lock_guard<std::mutex> lock(current_traj_mutex_);
     this->current_traj_ = current_traj_data;
+}
+
+
+void DogStatus::setCurrentLocation(cv::Point2d current_location) {
+    std::lock_guard<std::mutex> lock(current_location_mutex_);
+    current_location_ = current_location;
+}
+
+cv::Point2d DogStatus::getCurrentLocation() {
+    std::lock_guard<std::mutex> lock(current_location_mutex_);
+    return current_location_;
 }
 
 /**

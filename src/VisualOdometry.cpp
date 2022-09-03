@@ -88,7 +88,7 @@ void VisualOdometry::computeDescriptors() {
 void VisualOdometry::poseEstimationPnP() {
     cv::Mat E;
     // Essential matrix 
-    E = cv::findEssentialMat(prev_points, curr_points, focal_length, principal_point, cv::RANSAC, 0.99, 1, inlier_mask);
+    E = cv::findEssentialMat(prev_points, curr_points, focal_length, principal_point, cv::RANSAC, 0.999, 1, inlier_mask);
 
     // Rotation matrix and Translation matrix 
     cv::Mat R, t;
@@ -101,9 +101,6 @@ void VisualOdometry::poseEstimationPnP() {
         T.col(3).rowRange(0, 3) = t * 1.0;
         camera_pose = camera_pose * T.inv();
     }
-    // std::cout << "camera_pose = " << camera_pose << std::endl;
-    this->current_location = cv::Point2d((int)camera_pose.at<double>(0, 3), (int)camera_pose.at<double>(2, 3));
 
-    // cv::Point2d camera_point((int)camera_pose.at<double>(0, 3), (int)camera_pose.at<double>(2, 3));
-    // cv::drawMarker(display, cv::Point(camera_point.x + 500, camera_point.y + 500), cv::Scalar(0, 0, 255), cv::MARKER_SQUARE, 5, 2);
+    this->current_location = cv::Point2d((int)camera_pose.at<double>(0, 3), (int)camera_pose.at<double>(2, 3));
 }
