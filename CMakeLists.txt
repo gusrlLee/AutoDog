@@ -24,7 +24,7 @@ if ( APPLE )
     message("Your OS is MaxOS")
     include_directories(${CMAKE_SOURCE_DIR}/lib/sdk/src/macOS)
 elseif ( UNIX ) 
-    message("Your OS is Linux")
+    message("Your OS is UINX")
     include_directories(${CMAKE_SOURCE_DIR}/lib/sdk/src/linux)
 endif()
 
