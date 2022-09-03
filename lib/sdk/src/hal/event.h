@@ -43,7 +43,8 @@ public:
     {
         EVENT_OK = 1,
         EVENT_FAILED = 0,
-        EVENT_TIMEOUT = 0xFFFFFFFFFFFFFFFF,
+        // EVENT_TIMEOUT = 0xFFFFFFFFFFFFFFFF,
+        EVENT_TIMEOUT = 0xFFFFFFFF,
     };
     
     Event(bool isAutoReset = true, bool isSignal = false)
