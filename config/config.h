@@ -31,7 +31,7 @@
 #define _countof( _Array ) (int)(sizeof(_Array) / sizeof(_Array[0]))
 
 // UART PORT /dev/ttyUSB1
-#define UART_PORT "/dev/ttyUSB1"
+#define UART_PORT "/dev/ttyUSB0"
 #define UART_BAUDRATE B115200
 #define VMINX 1 
 #define NSERIAL_CHAR 256

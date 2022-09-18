@@ -1,5 +1,6 @@
 #include "CentralSystem.h"
 #include <ctime>
+
 using namespace rp::standalone::rplidar;
 
 CentralSystem::CentralSystem(bool mode, bool use_lidar) {
@@ -42,7 +43,7 @@ CentralSystem::CentralSystem(bool mode, bool use_lidar) {
     dog_status_->setSystemStatus(true);
 
     // threads 
-    camera_capture_thread_ = std::thread(&CentralSystem::cameraCaptureThread, camera_, dog_status_);
+    // camera_capture_thread_ = std::thread(&CentralSystem::cameraCaptureThread, camera_, dog_status_);
     compute_traj_thread_ = std::thread(&CentralSystem::computeTrajectoryThread, camera_, vo_, dog_status_);
     if(use_lidar_)
         scan_lidar_thread_ = std::thread(&CentralSystem::scanLidarThread, lidar_, dog_status_);
@@ -74,7 +75,7 @@ void CentralSystem::cameraCaptureThread(std::shared_ptr<Camera> camera, std::sha
     cv::VideoCapture cap;
     // issue : if divide camera capture thread, not work visual odometry 
     if (camera->systemMode()) {
-        cap.open(camera->cameraPath(), cv::CAP_GSTREAMER);
+        cap.open(0);
     }
     else {
         cap.open(camera->cameraPath());
@@ -100,14 +101,26 @@ void CentralSystem::cameraCaptureThread(std::shared_ptr<Camera> camera, std::sha
 
         dog_status->pushFrameBuffer(current_frame);
         dog_status->setCurrentFrame(current_frame);
-        std::this_thread::sleep_for(std::chrono::milliseconds(150));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(30));
     }
 }
 
 void CentralSystem::computeTrajectoryThread(std::shared_ptr<Camera> camera, std::shared_ptr<VisualOdometry> vo, std::shared_ptr<DogStatus> dog_status) {
     cv::Mat current_frame;
+	cv::VideoCapture cap;
 
-    cv::TickMeter tm;
+    // open camera 
+    if (camera->systemMode()) {
+        cap.open(0);
+    }
+    else {
+        cap.open(camera->cameraPath());
+    }
+
+    if (!cap.isOpened()) {
+        printf("[ERROR] Check Your Video or Camrea path!!!\n");
+        exit(1);
+    }
 
     while(1) {
         // read current_frame 
@@ -115,15 +128,15 @@ void CentralSystem::computeTrajectoryThread(std::shared_ptr<Camera> camera, std:
             printf("[SYSTEM] Close Your Camera!\n");
             break;
         }
-        current_frame = dog_status->popFrameBuffer();
+        // origin 
+        // current_frame = dog_status->popFrameBuffer();
+        cap >> current_frame;
         if (current_frame.empty()) {
             continue;
         }
 
-        tm.start();
+        dog_status->setCurrentFrame(current_frame);
         vo->addFrame(current_frame); 
-        tm.stop();
-        printf("average time in second per iteration is : %d\n", tm.getTimeSec() / tm.getCounter());
         std::this_thread::sleep_for(std::chrono::milliseconds(30));
     }
 }
@@ -277,7 +290,7 @@ void CentralSystem::startProgram() {
         size_t count = current_scan_data.size();
         int curr_loc_x = (2*int(current_location.x)) + 500;
         int curr_loc_y = 500 - (2*int(current_location.y));
-        printf("x : %d y: %d\n", curr_loc_x, curr_loc_y);
+        // printf("x : %d y: %d\n", curr_loc_x, curr_loc_y);
 
         cv::drawMarker(traj_display, cv::Point(curr_loc_x, curr_loc_y), cv::Scalar(0, 0, 255), cv::MARKER_SQUARE, 5, 2);
         // traj_display = dog_status_->getTrajData();
@@ -315,7 +328,7 @@ void CentralSystem::startProgram() {
         }
     }
     
-    camera_capture_thread_.join();
+    // camera_capture_thread_.join();
     communication_system_thread_.join();
     if(use_lidar_)
         scan_lidar_thread_.join();
