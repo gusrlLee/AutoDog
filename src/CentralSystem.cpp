@@ -1,9 +1,32 @@
 #include "CentralSystem.h"
 #include <ctime>
 
+// destination coordinate 
+static cv::Point dst;
+static std::queue<char> command_buffer;
+
 using namespace rp::standalone::rplidar;
 
+// for display input of mouse 
+static void displayMouseEventHandler(int event, int x, int y, int flag, void*) {
+    if ( event == cv::EVENT_LBUTTONDOWN ) {
+        printf("Wait...\n");
+        dst.x = x;
+        dst.y = y;
+
+        // when occur mouse click event, this method call astar algorithm for path construction.
+    }
+}
+
+inline float hue (int x, int y, int a, int b) {
+    return (x - a) * (x - a) + (y - b) * (y - b);
+}
+
 CentralSystem::CentralSystem(bool mode, bool use_lidar) {
+    // make namedwindow for display image 
+    cv::namedWindow( WINDOW_NAME, 1);
+    cv::namedWindow( SUB_WINDOW_NAME, 2);
+
     // Camera init
     printf("[SYSTEM]: Initialization Camera....");
     if ( mode ) { // Real Mode 
@@ -276,6 +299,7 @@ void CentralSystem::startProgram() {
 
     cv::Mat current_display;
     cv::Mat traj_display = cv::Mat::zeros(cv::Size(1000, 1000), CV_8UC3);
+    cv::setMouseCallback(SUB_WINDOW_NAME, displayMouseEventHandler, &traj_display);
 
     while (1) {
         if (!dog_status_->getSystemStatus()) {
@@ -319,8 +343,8 @@ void CentralSystem::startProgram() {
         if (current_display.empty()) 
             continue;
         
-        cv::imshow("display", current_display);
-        cv::imshow("Tracjectory", traj_display);
+        cv::imshow( WINDOW_NAME, current_display );
+        cv::imshow( SUB_WINDOW_NAME, traj_display );
         int key = cv::waitKey(27);
         if (key == 27) {
             dog_status_->setSystemStatus(false);
@@ -342,19 +366,22 @@ void CentralSystem::transformTheta(const float theta, double* output_array){
     double x_theta = 0;
     double y_theta = 0;
 
-    if(0 <= theta && theta < 90){
+    if(0 <= theta && theta < 90) {
         x_theta = sin(theta*(PI/180));
         y_theta = -1 * (cos(theta*(PI/180)));
 
-    } else if(90 <= theta && theta < 180){
+    } 
+    else if(90 <= theta && theta < 180) {
         x_theta = cos((theta - 90) * (PI/180));
         y_theta = sin((theta - 90) * (PI/180));
 
-    } else if(180 <= theta && theta < 270) {
+    } 
+    else if(180 <= theta && theta < 270) {
         x_theta = -1 * sin((theta - 180) * (PI/180));
         y_theta = cos((theta - 180.f) * (PI/180));
 
-    } else {
+    } 
+    else {
         x_theta = -1 * cos((theta - 270) * (PI/180));
         y_theta = -1 * sin((theta - 270) * (PI/180));
     }
@@ -364,3 +391,111 @@ void CentralSystem::transformTheta(const float theta, double* output_array){
 
     return;
 }
+
+void CentralSystem::pathConstruction() {
+    // look up table 
+    int neighbours[4][2] = { {0,10} ,{0,-10}, {10,0}, {-10,0} };
+    // sub data structure 
+    std::vector<Node> open_list;
+    std::vector<Node> close_list;
+    std::vector<Node> node_table;
+
+    std::vector<cv::Point> path;
+    int node_idx = -1;
+    Node start_node;
+    Node end_node;
+
+    // init 
+    open_list.push_back(start_node);
+
+    while ( !open_list.empty() ) {
+        Node current_node = open_list[0];
+        int current_idx = 0;
+        int count = 0; 
+
+        // find minimum f value of Node in open_list
+        for (int i = 0; i < open_list.size(); i++ ) {
+            if ( open_list[i].f < current_node.f ) {
+                current_node = open_list[i];
+                current_idx = count;
+            }
+            count++;
+        }
+
+        open_list.erase( open_list.begin() + current_idx );
+        close_list.push_back( current_node );
+
+        // if find end_node exit astar algorithm
+        if ( current_node.position == end_node.position ) {
+            Node current = current_node;
+            while ( current.pre_node_idx != -1 ) {
+                path.push_back( current.position ); 
+                current = node_table[current.pre_node_idx];
+            }
+            break;
+        }
+
+        node_idx++;
+        node_table.push_back( current_idx );
+
+        std::vector<Node> child;
+
+        for ( int i = 0; i < 8; i++ ) {  
+            cv::Point node_position = cv::Point(
+                current_node.position.x + neighbours[i][0],
+                current_node.position.y + neighbours[i][1]
+            );
+
+            bool with_in_range_criteria = false;
+            with_in_range_criteria = 
+                (node_position.x > display.cols) || 
+                (node_position.y > display.rows) ||
+                (node_position.x < 0) ||
+                (node_position.y < 0) || 
+                ((display.at<cv::Vec3b>(node_position.y, node_position.x)[0] > 200) &&
+                (display.at<cv::Vec3b>(node_position.y, node_position.x)[1] > 200) &&
+                (display.at<cv::Vec3b>(node_position.y, node_position.x)[2] > 200));
+            
+            if ( with_in_range_criteria ) {
+                continue;
+            }
+
+            Node new_node = Node(node_idx, node_position);
+            child.push_back( new_node );
+        }   
+        for (int num = 0; num < child.size(); num++) {
+            int i = 0;
+            for ( i = 0; i < close_list.size(); i++ ) {
+                if (child[num].position == close_list[i].position) {
+                    break;
+                }
+            } 
+
+            if ( i != close_list.size()) {
+                continue;
+            }
+
+            child[num].g = current_node.g + 1;
+            child[num].h = hue(child[num].position.x, 
+                                child[num].position.y, 
+                                end_node.position.x,
+                                end_node.position.y);
+
+            child[num].f = child[num].g + child[num].h;
+            int j = 0; 
+            for ( j = 0; j < open_list.size(); j++) 
+            {
+                if ( child[num].position == open_list[j].position ) {
+                    if (child[num].g > open_list[j].g) {
+                        break;
+                    }
+                }
+            }
+
+            if ( j == open_list.size()) {
+                open_list.push_back(child[num]);
+            }
+        }
+    } // while ( !open_list.emptu()) 
+}
+

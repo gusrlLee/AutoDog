@@ -10,7 +10,7 @@
 #include "Lidar.h"
 #include "VisualOdometry.h"
 #include "MotorControlSystem.h"
-
+#include "Node.h"
 
 class CentralSystem {
   public:
@@ -39,8 +39,10 @@ class CentralSystem {
     bool system_status_ = false;
     bool use_lidar_ = false;
 
+    void pathConstruction();
+
     // thread 
-    std::thread camera_capture_thread_;
+    // std::thread camera_capture_thread_;
     std::thread compute_traj_thread_;
     std::thread scan_lidar_thread_;
     std::thread communication_system_thread_;

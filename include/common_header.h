@@ -19,5 +19,8 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <list>
+#include <queue>
+#include <tuple>
 
 #endif
