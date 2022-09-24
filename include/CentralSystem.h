@@ -19,6 +19,9 @@ class CentralSystem {
     void printfSystemInformation(bool mode);
 
   private:
+    // Trajectory Map 
+    cv::Mat traj_display;
+
     // for Camera 
     std::shared_ptr<Camera> camera_; // camera sensor 
 
@@ -39,7 +42,7 @@ class CentralSystem {
     bool system_status_ = false;
     bool use_lidar_ = false;
 
-    void pathConstruction();
+    void pathConstruction( cv::Point starting_coord, cv::Point dst_coord );
 
     // thread 
     // std::thread camera_capture_thread_;

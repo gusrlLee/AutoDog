@@ -43,7 +43,7 @@
 #define START_FLAG 's'
 #define UP_FLAG 'u'
 #define GO_FORWARD 'f'
-#define TRUN_RIGHT 'r'
+#define TURN_RIGHT 'r'
 #define TURN_LEFT 'l'
 #define END_FLAG 'e'
 

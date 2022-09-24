@@ -3,6 +3,8 @@
 
 // destination coordinate 
 static cv::Point dst;
+static bool auto_driving_mode = false;
+static std::vector<cv::Point> path;
 static std::queue<char> command_buffer;
 
 using namespace rp::standalone::rplidar;
@@ -11,6 +13,7 @@ using namespace rp::standalone::rplidar;
 static void displayMouseEventHandler(int event, int x, int y, int flag, void*) {
     if ( event == cv::EVENT_LBUTTONDOWN ) {
         printf("Wait...\n");
+        auto_driving_mode = true;
         dst.x = x;
         dst.y = y;
 
@@ -26,6 +29,10 @@ CentralSystem::CentralSystem(bool mode, bool use_lidar) {
     // make namedwindow for display image 
     cv::namedWindow( WINDOW_NAME, 1);
     cv::namedWindow( SUB_WINDOW_NAME, 2);
+    // traj_display = cv::Mat::zeros(cv::Size(1000, 1000), CV_8UC3);
+    traj_display = cv::imread("../Data/frame.jpg");
+    cv::resize(traj_display, traj_display, cv::Size(1000, 1000));
+    cv::setMouseCallback(SUB_WINDOW_NAME, displayMouseEventHandler, &traj_display);
 
     // Camera init
     printf("[SYSTEM]: Initialization Camera....");
@@ -254,7 +261,7 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
 
         if ( is_in_dangerzone ) {
             if ( is_safe_right == true && is_safe_left == false ) { // safe right 
-                command = TRUN_RIGHT;
+                command = TURN_RIGHT;
             }
             else if ( is_safe_left == true && is_safe_right == false ) { // safe left 
                 command = TURN_LEFT;
@@ -262,11 +269,11 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
             else if ( is_safe_right == false && is_safe_left == false ) {
                 // if dog can't turn left and turn right, dog need to turn arround
                 // So Continue giving 's' to command, due to turn arround.
-                command = TRUN_RIGHT;
+                command = TURN_RIGHT;
             }
             else if ( is_safe_right == true && is_safe_left == true ) {
                 // if both is_safe_right and is_safe_left is true, we choice right turn.
-                command = TRUN_RIGHT;
+                command = TURN_RIGHT;
             }
         } 
         else {
@@ -296,9 +303,8 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
 void CentralSystem::startProgram() {
     float temp = 0;
     double theta_array[2] = {0};
-
     cv::Mat current_display;
-    cv::Mat traj_display = cv::Mat::zeros(cv::Size(1000, 1000), CV_8UC3);
+
     cv::setMouseCallback(SUB_WINDOW_NAME, displayMouseEventHandler, &traj_display);
 
     while (1) {
@@ -342,6 +348,23 @@ void CentralSystem::startProgram() {
 
         if (current_display.empty()) 
             continue;
+
+        // Auto Driving Mode 
+        if ( auto_driving_mode ) {
+            cv::Point starting_coord = cv::Point(curr_loc_x, curr_loc_y);
+            cv::Point dst_coord = dst;
+            cv::circle(traj_display, starting_coord, 10, cv::Scalar(255, 255, 0), -1, cv::FILLED);
+            cv::circle(traj_display, dst_coord, 10, cv::Scalar(255, 255, 0), -1, cv::FILLED);
+            // A* algorithm
+            pathConstruction(starting_coord, dst_coord);
+
+            for ( int n = 0; n < path.size(); n++ ) {
+                cv::circle(traj_display, path[n], 5, cv::Scalar(0, 255, 255), 3, -1);
+            }
+            // reload 
+            path.clear();
+            auto_driving_mode = false;
+        }
         
         cv::imshow( WINDOW_NAME, current_display );
         cv::imshow( SUB_WINDOW_NAME, traj_display );
@@ -392,22 +415,25 @@ void CentralSystem::transformTheta(const float theta, double* output_array){
     return;
 }
 
-void CentralSystem::pathConstruction() {
+void CentralSystem::pathConstruction( cv::Point starting_coord, cv::Point dst_coord ) {
     // look up table 
-    int neighbours[4][2] = { {0,10} ,{0,-10}, {10,0}, {-10,0} };
+    // 8-direction
+    int neighbours[8][2] = { {0,1} ,{0,-1}, {1,0}, {-1,0}, {1, 1}, {-1, 1}, {1, -1}, {-1, -1} };
     // sub data structure 
     std::vector<Node> open_list;
     std::vector<Node> close_list;
     std::vector<Node> node_table;
 
-    std::vector<cv::Point> path;
+    // output path
     int node_idx = -1;
-    Node start_node;
-    Node end_node;
+    // start point 
+    Node start_node = Node( starting_coord );
+    Node end_node = Node( dst_coord );
 
     // init 
     open_list.push_back(start_node);
 
+    // start algorithm 
     while ( !open_list.empty() ) {
         Node current_node = open_list[0];
         int current_idx = 0;
@@ -436,7 +462,7 @@ void CentralSystem::pathConstruction() {
         }
 
         node_idx++;
-        node_table.push_back( current_idx );
+        node_table.push_back( current_node );
 
         std::vector<Node> child;
 
@@ -446,15 +472,15 @@ void CentralSystem::pathConstruction() {
                 current_node.position.y + neighbours[i][1]
             );
 
-            bool with_in_range_criteria = false;
+            bool with_in_range_criteria = false; 
             with_in_range_criteria = 
-                (node_position.x > display.cols) || 
-                (node_position.y > display.rows) ||
+                (node_position.x > traj_display.cols) || 
+                (node_position.y > traj_display.rows) ||
                 (node_position.x < 0) ||
-                (node_position.y < 0) || 
-                ((display.at<cv::Vec3b>(node_position.y, node_position.x)[0] > 200) &&
-                (display.at<cv::Vec3b>(node_position.y, node_position.x)[1] > 200) &&
-                (display.at<cv::Vec3b>(node_position.y, node_position.x)[2] > 200));
+                (node_position.y < 0) ||  
+                ((traj_display.at<cv::Vec3b>(node_position.y, node_position.x)[0] > 200 ) &&
+                (traj_display.at<cv::Vec3b>(node_position.y, node_position.x)[1] > 200) &&
+                (traj_display.at<cv::Vec3b>(node_position.y, node_position.x)[2] > 200));
             
             if ( with_in_range_criteria ) {
                 continue;
