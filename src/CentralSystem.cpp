@@ -30,7 +30,7 @@ CentralSystem::CentralSystem(bool mode, bool use_lidar) {
     cv::namedWindow( WINDOW_NAME, 1);
     cv::namedWindow( SUB_WINDOW_NAME, 2);
     // traj_display = cv::Mat::zeros(cv::Size(1000, 1000), CV_8UC3);
-    traj_display = cv::imread("../Data/frame.jpg");
+    traj_display = cv::imread("../Data/frame1.jpg");
     cv::resize(traj_display, traj_display, cv::Size(1000, 1000));
     cv::setMouseCallback(SUB_WINDOW_NAME, displayMouseEventHandler, &traj_display);
 
@@ -167,6 +167,7 @@ void CentralSystem::computeTrajectoryThread(std::shared_ptr<Camera> camera, std:
 
         dog_status->setCurrentFrame(current_frame);
         vo->addFrame(current_frame); 
+        dog_status->setCurrentLocation(vo->getCurrentLocation());
         std::this_thread::sleep_for(std::chrono::milliseconds(30));
     }
 }
@@ -193,6 +194,8 @@ void CentralSystem::scanLidarThread(std::shared_ptr<Lidar> lidar, std::shared_pt
 }
 
 void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem> motor_control_system, std::shared_ptr<DogStatus> dog_status) {
+    // need to edit for command buffer operation 
+    // 1. make triangle and connect current location to dstination location 
     char command;
     bool status;
     bool is_in_dangerzone = false;
@@ -200,11 +203,137 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
     bool is_safe_right = true;
     float object_collision_distance_threshold = 600;
     motor_control_system->sendToCommand(UP_FLAG);
+    // need to delay due to init robot time 
+
+    float direction_estimate_arr[3];
 
     while(1) {
         if (!dog_status->getSystemStatus()) {
             motor_control_system->sendToCommand(END_FLAG);
             break;
+        }
+
+        // start auto dirving_mode 
+        if ( auto_driving_mode ) {
+
+            printf("detecting...\n");
+
+            // 1. get current lidar scan data 
+            std::vector<sl_lidar_response_measurement_node_hq_t> current_scan_data = dog_status->getScanData();
+
+            // 2. check safe zone  
+            for (int i=0; i<current_scan_data.size(); i++) {
+                float theta = current_scan_data[i].angle_z_q14 * 90.f / 16384.f; 
+                // we consider 90 > theta,
+                // so other theta break
+                if ( theta > 90) break;
+                float object_distance = current_scan_data[i].dist_mm_q2 / 4.0f;
+                if (theta < 45) { // check colision warning
+                    if (object_distance != 0 && object_distance < object_collision_distance_threshold) {
+                        is_in_dangerzone = true;
+                    }
+                }
+                else { // check right 
+                    if (object_distance != 0 && object_distance < object_collision_distance_threshold) {
+                        is_safe_right = false;
+                    }
+                }
+            }
+
+            for (int i=current_scan_data.size() - 1; i>=0; i--) {
+                float theta = current_scan_data[i].angle_z_q14 * 90.f / 16384.f; 
+                // we consider 270 < theta,
+                // so other theta break
+                if ( theta < 270) break;
+                float object_distance = current_scan_data[i].dist_mm_q2 / 4.0f;
+                if (theta > 315) { // check colision warning
+                    if (object_distance != 0 && object_distance < object_collision_distance_threshold) {
+                        is_in_dangerzone = true;
+                    }
+                }
+                else { // check left
+                    if (object_distance != 0 && object_distance < object_collision_distance_threshold) {
+                        is_safe_left = false;
+                    }
+                }
+            }
+
+            cv::Point2f current_loc = dog_status->getCurrentLocation();
+
+            // idx 0 : FRONT
+            // idx 1 : left 
+            // idx 2 : right 
+            if ( is_in_dangerzone ) {
+                if ( !is_safe_right && !is_safe_left ) {
+                    // for turn around 
+                    command = TURN_RIGHT;
+                }
+
+                else if ( !is_safe_right && is_safe_left ) {
+                    current_loc.x -= 5;
+                    float hue_value = hue(current_loc.x, 
+                                        current_loc.y, 
+                                        dst.x,
+                                        dst.y);
+
+                    direction_estimate_arr[1] = hue_value;
+                }
+
+                else if ( is_safe_right && !is_safe_left ) { 
+                    current_loc.x += 5;
+                    float hue_value = hue(current_loc.x, 
+                                        current_loc.y, 
+                                        dst.x,
+                                        dst.y);
+
+                    direction_estimate_arr[2] = hue_value;
+                }
+                else {
+                    current_loc.x -= 5;
+                    float hue_value = hue(current_loc.x, 
+                                        current_loc.y, 
+                                        dst.x,
+                                        dst.y);
+
+                    direction_estimate_arr[1] = hue_value;
+                    current_loc.x += 5;
+
+                    hue_value = hue(current_loc.x, 
+                                        current_loc.y, 
+                                        dst.x,
+                                        dst.y);
+
+                    direction_estimate_arr[2] = hue_value;
+                    
+                    float min_value = 9999999.0f;
+                    int idx = 0;
+                    for (int i=0; i<3; i++) {
+                        if ( direction_estimate_arr[i] < min_value) {
+                            min_value = direction_estimate_arr[i];
+                            idx = i;
+                        }
+                    }
+
+                    if (idx == 0) {
+                        command = GO_FORWARD;
+                    }
+                    else if(idx == 1) {
+                        command = TURN_LEFT;
+                    }
+                    else {
+                        command = TURN_RIGHT;
+                    }
+                }
+            }
+
+            // auto driving mode turn off 
+            if (hue( current_loc.x, current_loc.y, dst.x, dst.y) < 10) 
+                auto_driving_mode = false;
+            // init flog 
+            is_in_dangerzone = false;
+            is_safe_right = true;
+            is_safe_left = true;
+            
         }
 
         std::vector<sl_lidar_response_measurement_node_hq_t> current_scan_data = dog_status->getScanData();
