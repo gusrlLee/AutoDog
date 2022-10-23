@@ -23,7 +23,7 @@ void loop() {
         initServo();
         delay(1000);
         initFlag = 1;
-      }e
+      }
       
     }
     

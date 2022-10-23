@@ -6,13 +6,13 @@
 #define SUB_WINDOW_NAME "Trajectory"
 
 // Your Camera Path
-#define CAMERA_PATH "nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)1280, height=(int)720, framerate=(fraction)30/1 ! nvvidconv flip-method=0 ! video/x-raw, width=(int)1226, height=(int)370, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink"
+#define CAMERA_PATH "nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)1280, height=(int)720, framerate=(fraction)30/1 ! nvvidconv flip-method=2 ! video/x-raw, width=(int)1226, height=(int)370, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink"
 
 #define REAL_FOCAL_LENGTH 1316.9918
 
-#define SIMULATION_DATA_PATH "../Data/07/image_0/%06d.png"
+// #define SIMULATION_DATA_PATH "../Data/07/image_0/%06d.png"
 // #define SIMULATION_DATA_PATH "../Data/dataset/%05d.png"
-// #define SIMULATION_DATA_PATH "../Data/turn_dataset1/%05d.png"
+#define SIMULATION_DATA_PATH "../Data/turn_dataset1/%05d.png"
 #define SIMUL_FOCAL_LENGTH 707.0912
 
 // Your lidar port in dev 
