@@ -16,7 +16,6 @@ static void displayMouseEventHandler(int event, int x, int y, int flag, void*) {
         auto_driving_mode = true;
         dst.x = x;
         dst.y = y;
-
         // when occur mouse click event, this method call astar algorithm for path construction.
     }
 }
@@ -25,33 +24,33 @@ inline float hue (int x, int y, int a, int b) {
     return (x - a) * (x - a) + (y - b) * (y - b);
 }
 
-CentralSystem::CentralSystem(bool mode, bool use_lidar) {
+CentralSystem::CentralSystem(SystemInformation system_info) {
     // make namedwindow for display image 
-    cv::namedWindow( WINDOW_NAME, 1);
-    cv::namedWindow( SUB_WINDOW_NAME, 2);
-    // traj_display = cv::Mat::zeros(cv::Size(1000, 1000), CV_8UC3);
-    traj_display = cv::imread("../Data/frame1.jpg");
-    cv::resize(traj_display, traj_display, cv::Size(1000, 1000));
+    cv::namedWindow(WINDOW_NAME, 1);
+    cv::namedWindow(SUB_WINDOW_NAME, 2);
+
+    traj_display = cv::Mat::zeros(cv::Size(1000, 1000), CV_8UC3);
+    // for simulation 
+    // traj_display = cv::imread("../Data/frame1.jpg");
+    // cv::resize(traj_display, traj_display, cv::Size(1000, 1000));
+
+    // call back function 
     cv::setMouseCallback(SUB_WINDOW_NAME, displayMouseEventHandler, &traj_display);
 
     // Camera init
     printf("[SYSTEM]: Initialization Camera....");
-    if ( mode ) { // Real Mode 
-        cv::Point2d center_point = cv::Point2d(601.8873, 183.1104);
-        camera_ = std::make_shared<Camera>(CAMERA_PATH, REAL_FOCAL_LENGTH, center_point, mode);
-    }
-    else { // simulation mode 
-        cv::Point2d center_point = cv::Point2d(601.8873, 183.1104);
-        camera_ = std::make_shared<Camera>(SIMULATION_DATA_PATH, SIMUL_FOCAL_LENGTH, center_point, mode);
-    }
+    cv::Point2d center_point = cv::Point2d(601.8873, 183.1104);
+    camera_ = std::make_shared<Camera>(system_info.camera_path, system_info.focal_length, center_point);
     printf("\t[OK]\n");
 
-    use_lidar_ = use_lidar;
     // LiDAR init 
-    if (use_lidar_){
-        printf("[SYSTEM]: Initialization LiDAR....");
-        lidar_ = std::make_shared<Lidar>(LIDAR_PORT, LIDAR_BAUDRATE);
+    printf("[SYSTEM]: Initialization LiDAR....");
+    if (!system_info.lidar_path.empty()) {
+        lidar_ = std::make_shared<Lidar>(system_info.lidar_path, system_info.lidar_baudrate);
         printf("\t[OK]\n");
+    } 
+    else {
+        printf("\tNot connect LiDAR Device\n");
     }
 
     // DogStatus init 
@@ -65,36 +64,48 @@ CentralSystem::CentralSystem(bool mode, bool use_lidar) {
     printf("\t[OK]\n");
 
     printf("[SYSTEM]: Initialization Motor Control System....");
-    motor_control_system_ = std::make_shared<MotorControlSystem>(UART_PORT, UART_BAUDRATE);
-    printf("\t[OK]\n");
+    if (!system_info.arduino_path.empty()) {
+        motor_control_system_ = std::make_shared<MotorControlSystem>(system_info.arduino_path.c_str(), system_info.arduino_baudrate);
+        printf("\t[OK]\n");
+    }
+    else {
+        printf("\tNot connect Arduino Device\n");
+    }
 
-    system_status_ = true;
-    this->printfSystemInformation(mode);
+    this->printfSystemInformation(system_info);
     dog_status_->setSystemStatus(true);
 
     // threads 
-    // camera_capture_thread_ = std::thread(&CentralSystem::cameraCaptureThread, camera_, dog_status_);
     compute_traj_thread_ = std::thread(&CentralSystem::computeTrajectoryThread, camera_, vo_, dog_status_);
-    if(use_lidar_)
+    if (!system_info.lidar_path.empty()) 
         scan_lidar_thread_ = std::thread(&CentralSystem::scanLidarThread, lidar_, dog_status_);
 
-    communication_system_thread_ = std::thread(&CentralSystem::communicationSystemThread, motor_control_system_, dog_status_);
+    if (!system_info.arduino_path.empty()) 
+        communication_system_thread_ = std::thread(&CentralSystem::communicationSystemThread, motor_control_system_, dog_status_);
 }
 
-void CentralSystem::printfSystemInformation(bool mode) {
+void CentralSystem::printfSystemInformation(SystemInformation system_info) {
     printf("==========================System Information===========================\n");
     printf("AUTO DOG SYSTEM v1.0.0\n");
-    printf("System Mode = %s\n", mode ? "Real Mode" : "Simulation Mode" );
-    if ( mode )
-        printf("Camera PATH = %s\n", CAMERA_PATH);
-    else 
-        printf("Camera PATH = %s\n", SIMULATION_DATA_PATH);
+    printf("Data src Path         = %s\n", system_info.camera_path);
+    printf("Focal Length          = %f\n", system_info.focal_length);
 
-    if (use_lidar_) {
-        printf("LiDAR PATH  = %s\n", LIDAR_PORT);
-        printf("Boud Rate   = %d\n", LIDAR_BAUDRATE);
+    if (!system_info.lidar_path.empty()) {
+        printf("LiDAR PATH        = %s\n", system_info.lidar_path);
+        printf("LiDAR Boud Rate   = %d\n", system_info.lidar_baudrate);
+    } else {
+        printf("LiDAR PATH        = [NOT USE]\n");
+        printf("LiDAR baud Rate   = [NOT USE]");
     }
-    printf("Arduino Path    = %s\n", UART_PORT);
+
+    if (!system_info.arduino_path.empty()) {
+        printf("Arduino Path      = %s\n", system_info.arduino_path);
+        printf("Arduino Baudrate  = %d\n", system_info.arduino_baudrate);
+    } else {
+        printf("Arduino Path      = [NOT USE]\n");
+        printf("Arduino Baudrate  = [NOT USE]\n");
+    }
+
     printf("System Status = %s\n", system_status_ ? "[ON]" : "[OFF]");
     printf("Auto System Start...\n");
     printf("=======================================================================\n\n");
@@ -104,12 +115,7 @@ void CentralSystem::printfSystemInformation(bool mode) {
 void CentralSystem::cameraCaptureThread(std::shared_ptr<Camera> camera, std::shared_ptr<DogStatus> dog_status) {
     cv::VideoCapture cap;
     // issue : if divide camera capture thread, not work visual odometry 
-    if (camera->systemMode()) {
-        cap.open(0);
-    }
-    else {
-        cap.open(camera->cameraPath());
-    }
+    cap.open(camera->getCameraPath());
 
     if (!cap.isOpened()) {
         printf("[ERROR] Check Your Video or Camrea path!!!\n");
@@ -140,12 +146,7 @@ void CentralSystem::computeTrajectoryThread(std::shared_ptr<Camera> camera, std:
 	cv::VideoCapture cap;
 
     // open camera 
-    if (camera->systemMode()) {
-        cap.open(0);
-    }
-    else {
-        cap.open(camera->cameraPath());
-    }
+    cap.open(camera->getCameraPath());
 
     if (!cap.isOpened()) {
         printf("[ERROR] Check Your Video or Camrea path!!!\n");
@@ -261,8 +262,8 @@ void CentralSystem::communicationSystemThread(std::shared_ptr<MotorControlSystem
             cv::Point2f current_loc = dog_status->getCurrentLocation();
 
             // idx 0 : FRONT
-            // idx 1 : left 
-            // idx 2 : right 
+            // idx 1 : LEFT  
+            // idx 2 : RIGHT
             if ( is_in_dangerzone ) {
                 if ( !is_safe_right && !is_safe_left ) {
                     // for turn around 

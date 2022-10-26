@@ -1,19 +1,20 @@
 #ifndef DOG_STATUS_H
 #define DOG_STATUS_H
 
+#include "opencv2/opencv.hpp"
+#include "opencv2/features2d.hpp"
+
+#include "config/config.h"
+#include "rplidar.h"
+#include "sl_lidar.h" 
+#include "sl_lidar_driver.h"
+
 #include <iostream>
+#include <stdio.h>
 #include <vector>
 #include <algorithm>
 #include <string>
 #include <queue>
-
-#include <opencv2/opencv.hpp>
-#include <opencv2/features2d.hpp>
-
-// for lidar 
-#include "rplidar.h"
-#include "sl_lidar.h" 
-#include "sl_lidar_driver.h"
 
 class DogStatus {
   public:

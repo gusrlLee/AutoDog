@@ -1,8 +1,18 @@
 #ifndef VISUAL_ODOMETRY_H
 #define VISUAL_ODOMETRY_H
 
-#include "common_header.h"
+#include "opencv2/opencv.hpp"
+#include "opencv2/features2d.hpp"
+
 #include "Camera.h"
+#include "config/config.h"
+
+#include <stdio.h>
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <thread>
+#include <mutex>
 
 class VisualOdometry 
 {

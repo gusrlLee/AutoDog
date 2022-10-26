@@ -1,9 +1,10 @@
 #ifndef CENTRAL_SYSTEM_H
 #define CENTRAL_SYSTEM_H
 
-#include "common_header.h"
-
 #include "opencv2/opencv.hpp"
+#include "opencv2/features2d.hpp"
+
+#include "config/config.h"
 #include "DogStatus.h"
 #include "Camera.h"
 #include "config/config.h"
@@ -12,15 +13,36 @@
 #include "MotorControlSystem.h"
 #include "Node.h"
 
+#include <iostream>
+#include <mutex>
+#include <string>
+#include <vector>
+#include <queue>
+
+// arguemnts 
+struct SystemInformation {
+    std::string camera_path;
+    float focal_length;
+    // for lidar 
+    std::string lidar_path;
+    int lidar_baudrate;
+    // for arduino 
+    std::string arduino_path;
+    int arduino_baudrate;
+};
+
 class CentralSystem {
   public:
-    CentralSystem(bool mode, bool is_use_lidar);
+    CentralSystem(SystemInformation system_info);
     void startProgram();
-    void printfSystemInformation(bool mode);
+    void printfSystemInformation(SystemInformation system_info);
 
   private:
     // Trajectory Map 
     cv::Mat traj_display;
+    std::string camera_path_;
+    std::string lidar_path_;
+    std::string arduino_path_;
 
     // for Camera 
     std::shared_ptr<Camera> camera_; // camera sensor 

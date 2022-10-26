@@ -1,7 +1,20 @@
 #ifndef MOTOR_CONTROL_SYSTEM_H
 #define MOTOR_CONTROL_SYSTEM_H
 
-#include "common_header.h"
+#include "config/config.h"
+
+#include <stdio.h>
+#include <unistd.h>       // Used for UART
+#include <sys/fcntl.h>    // Used for UART
+#include <termios.h>      // Used for UART
+#include <string>
+
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <algorithm>
+#include <vector>
+#include <string>
 
 class MotorControlSystem {
   public:
