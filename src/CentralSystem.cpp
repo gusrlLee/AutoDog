@@ -45,7 +45,8 @@ CentralSystem::CentralSystem(SystemInformation system_info) {
 
     // LiDAR init 
     printf("[SYSTEM]: Initialization LiDAR....");
-    if (!system_info.lidar_path.empty()) {
+    if (system_info.lidar_path.compare("nullptr") != 0) {
+        use_lidar_ = true;
         lidar_ = std::make_shared<Lidar>(system_info.lidar_path, system_info.lidar_baudrate);
         printf("\t[OK]\n");
     } 
@@ -64,7 +65,8 @@ CentralSystem::CentralSystem(SystemInformation system_info) {
     printf("\t[OK]\n");
 
     printf("[SYSTEM]: Initialization Motor Control System....");
-    if (!system_info.arduino_path.empty()) {
+    if (system_info.arduino_path.compare("nullptr") != 0) {
+        use_arduino_ = true;
         motor_control_system_ = std::make_shared<MotorControlSystem>(system_info.arduino_path.c_str(), system_info.arduino_baudrate);
         printf("\t[OK]\n");
     }
@@ -77,10 +79,10 @@ CentralSystem::CentralSystem(SystemInformation system_info) {
 
     // threads 
     compute_traj_thread_ = std::thread(&CentralSystem::computeTrajectoryThread, camera_, vo_, dog_status_);
-    if (!system_info.lidar_path.empty()) 
+    if (system_info.lidar_path.compare("nullptr") != 0) 
         scan_lidar_thread_ = std::thread(&CentralSystem::scanLidarThread, lidar_, dog_status_);
 
-    if (!system_info.arduino_path.empty()) 
+    if (system_info.arduino_path.compare("nullptr") != 0) 
         communication_system_thread_ = std::thread(&CentralSystem::communicationSystemThread, motor_control_system_, dog_status_);
 }
 
@@ -90,15 +92,15 @@ void CentralSystem::printfSystemInformation(SystemInformation system_info) {
     printf("Data src Path         = %s\n", system_info.camera_path);
     printf("Focal Length          = %f\n", system_info.focal_length);
 
-    if (!system_info.lidar_path.empty()) {
+    if (system_info.lidar_path.compare("nullptr") != 0) { 
         printf("LiDAR PATH        = %s\n", system_info.lidar_path);
         printf("LiDAR Boud Rate   = %d\n", system_info.lidar_baudrate);
     } else {
         printf("LiDAR PATH        = [NOT USE]\n");
-        printf("LiDAR baud Rate   = [NOT USE]");
+        printf("LiDAR baud Rate   = [NOT USE]\n");
     }
 
-    if (!system_info.arduino_path.empty()) {
+    if (system_info.arduino_path.compare("nullptr") != 0) {
         printf("Arduino Path      = %s\n", system_info.arduino_path);
         printf("Arduino Baudrate  = %d\n", system_info.arduino_baudrate);
     } else {
@@ -506,9 +508,13 @@ void CentralSystem::startProgram() {
     }
     
     // camera_capture_thread_.join();
-    communication_system_thread_.join();
+    
+    if(use_arduino_)
+        communication_system_thread_.join();
+
     if(use_lidar_)
         scan_lidar_thread_.join();
+
     compute_traj_thread_.join();
 
     cv::destroyAllWindows();

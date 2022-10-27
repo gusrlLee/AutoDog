@@ -18,16 +18,21 @@
 // Your lidar port in dev 
 #define LIDAR_PORT "/dev/ttyUSB0"
 #define SCALE 0.5
+
 // screen size 
 #define SCREENX 1000
 #define SCREENY 1000
+
 // start location 
 #define STARTX 100
 #define STARTY 100
+
 // baudrate 
 #define LIDAR_BAUDRATE 115200
+
 // PI 
 #define PI 3.14
+
 // transform ratio
 #define PIXEL_RATIO 0.02
 #define OUR_LIDAR_MAX_DISTANCE 2000

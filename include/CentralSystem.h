@@ -63,6 +63,7 @@ class CentralSystem {
     // for System 
     bool system_status_ = false;
     bool use_lidar_ = false;
+    bool use_arduino_ = false;
 
     void pathConstruction( cv::Point starting_coord, cv::Point dst_coord );
 
