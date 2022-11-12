@@ -27,10 +27,6 @@ void loop() {
       
     }
     
-    if (incomingByte == 117) {  // input = 'u'
-      sitUp();
-    }
-    
     if (incomingByte == 102) {  // input = 'f'
       forward();
     }
@@ -44,7 +40,6 @@ void loop() {
     }
     
     if (incomingByte == 101) {  // input = 'e'
-      turnOff();
       initFlag = 0;
     }
   }
