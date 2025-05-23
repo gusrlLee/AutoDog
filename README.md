@@ -2,6 +2,11 @@
 
 AutoDog은 C++과 아두이노를 기반으로 개발된 4족 보행 자율주행 로봇 프로젝트입니다. 이 프로젝트의 목표는 LiDAR 센서와 카메라를 활용한 Visual Odometry를 통해 주변 환경을 인식하고, 장애물을 회피하며 목표 지점까지 자율적으로 이동하는 로봇 시스템을 구축하는 것이었습니다. 졸업 요건이었던 캡스톤디자인 과제로 진행되었습니다.
 
+<p align="center">
+  <img src="https://github.com/moko-user/AutoDog/raw/main/AutoDog/Data/AutoDog_front.jpg" width="300"/>
+  <img src="https://github.com/moko-user/AutoDog/raw/main/AutoDog/Data/AutoDog_back.jpg" width="300"/>
+</p>
+
 ## 주요 기능
 
 - **4족 보행 제어**: 아두이노 기반 서보모터 제어를 통한 로봇의 기본 이동 (전진, 좌/우회전, 자세제어).
