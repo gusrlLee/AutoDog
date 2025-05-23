@@ -8,8 +8,8 @@ AutoDog은 C++과 아두이노를 기반으로 개발된 4족 보행 자율주�
     <td style="text-align: center;">AutoDog Back View</td>
   </tr>
   <tr>
-    <td><img src="Data/AutoDog_front.jpg" alt="AutoDog Front View" width="350"/></td>
-    <td><img src="Data/AutoDog_back.jpg" alt="AutoDog Back View" width="350"/></td>
+    <td><img src="Data/AutoDog_front.jpg" alt="AutoDog Front View" width="500"/></td>
+    <td><img src="Data/AutoDog_back.jpg" alt="AutoDog Back View" width="500"/></td>
   </tr>
 </table>
 
